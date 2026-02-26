@@ -1,0 +1,17 @@
+services:
+
+  # Durable Execution - Temporal
+  temporal:
+    image: temporalio/admin-tools:latest
+    entrypoint: ["temporal", "server", "start-dev", "--ip", "0.0.0.0", "--ui-port", "8233"]
+    ports:
+      - "7233:7233"
+      - "8233:8233"
+    environment:
+      - TEMPORAL_CLI_ADDRESS=localhost:7233
+    networks:
+      - biosciences-network
+
+networks:
+  biosciences-network:
+    driver: bridge
