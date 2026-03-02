@@ -103,7 +103,7 @@ Maintained by the **Temporal Engineer** (Agent 7). See [AGENTS.md](https://githu
 | Direction | Repository | Relationship |
 |-----------|------------|--------------|
 | Upstream | [biosciences-mcp](https://github.com/open-biosciences/biosciences-mcp) | Activities call MCP tools via stdio transport |
-| Upstream | [biosciences-architecture](https://github.com/open-biosciences/biosciences-architecture) | ADR-001, ADR-004 workflow compliance |
+| Upstream | [biosciences-program](https://github.com/open-biosciences/biosciences-program) | ADR-001, ADR-004 workflow compliance |
 
 ## Related Repositories
 
