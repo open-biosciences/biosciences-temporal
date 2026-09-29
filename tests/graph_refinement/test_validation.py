@@ -297,6 +297,15 @@ def test_unused_evidence_and_unclaimed_edge_are_warnings(
     assert {"UNUSED_EVIDENCE", "EDGE_WITHOUT_CLAIM"} <= {i.code for i in report.issues}
 
 
+def test_open_issues_shape(bundle: dict[str, Any]) -> None:
+    bundle["open_issues"] = ["Retrieve NCT record before upgrading c-2."]
+    assert not _error_codes(bundle)
+    bundle["open_issues"] = ["", None]
+    assert "INVALID_OPEN_ISSUES" in _error_codes(bundle)
+    bundle["open_issues"] = "not a list"
+    assert "INVALID_OPEN_ISSUES" in _error_codes(bundle)
+
+
 # --- Revision metadata ----------------------------------------------------
 
 

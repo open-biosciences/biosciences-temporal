@@ -241,6 +241,7 @@ class _Validator:
         self.check_claims(sections["claims"], scope_disease)
         self.check_budget("claims", len(sections["claims"]), max_claims)
         self.check_revision(doc)
+        self.check_open_issues(doc.get("open_issues"))
 
         for index, record in enumerate(sections["evidence"]):
             if isinstance(record, Mapping):
@@ -712,6 +713,19 @@ class _Validator:
                     f"{path}.reviewer_id",
                     f"Claim {cid!r}: human acceptance must name the reviewer.",
                 )
+
+    def check_open_issues(self, open_issues: Any) -> None:
+        if open_issues is None:
+            return
+        if not isinstance(open_issues, list) or not all(
+            _nonempty_str(item) or (isinstance(item, Mapping) and item)
+            for item in open_issues
+        ):
+            self.add(
+                "INVALID_OPEN_ISSUES",
+                "open_issues",
+                "open_issues must be a list of non-empty strings or objects.",
+            )
 
     # --- revision ---------------------------------------------------------
 

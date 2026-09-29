@@ -55,9 +55,14 @@ Exit codes: `0` valid (warnings allowed), `1` errors found, `2` the file is not 
                 "evidence_ids": ["…"], "derived_from": ["<claim_id>"], "genotype_dependent": false,
                 "qualifiers": {"disease": "MONDO:…", "genotype": "…", "context_transfer": {"from": "…", "rationale": "…"}},
                 "review": {"disposition": "pending|needs_review|accepted|rejected",
-                           "reviewer_kind": "human|model|deterministic", "reviewer_id": "…"}}]
+                           "reviewer_kind": "human|model|deterministic", "reviewer_id": "…"}}],
+  "open_issues": ["pending retrieval, unresolved identifier, or question for the reviewer (optional)"]
 }
 ```
+
+`open_issues` is optional. It holds gaps the contract cannot express as a claim: retrievals not yet
+run, identifiers awaiting LOCATE → RETRIEVE, and definition conflicts for the reviewer. Pending
+retrievals belong here, not in `evidence`, which records only retrievals that actually ran.
 
 `content_digest` in `revision` is sha256 over canonical JSON (sorted keys, compact separators,
 UTF-8) of the whole document except the `revision` block. Use it to detect content that changed
@@ -96,6 +101,7 @@ Errors make `ok` false. Warnings do not. Codes are stable identifiers for automa
 | `MODEL_ACCEPTANCE_NOT_ALLOWED` | error | Only `reviewer_kind: human` may set `accepted`. |
 | `MISSING_REVIEWER` | error | Human acceptance names `reviewer_id`. |
 | `MISSING_PROVENANCE_FIELD`, `INVALID_TIMESTAMP`, `INVALID_DIGEST` | error | Every evidence record has `source`, `record_id`, a timezone-aware `retrieved_at`, and a `sha256:` digest. |
+| `INVALID_OPEN_ISSUES` | error | `open_issues`, if present, is a list of non-empty strings or objects. |
 | `UNUSED_EVIDENCE` | warning | Every evidence record is cited by some claim. |
 | `EDGE_WITHOUT_CLAIM` | warning | Every edge is stated by some claim. |
 | `MISSING_REVISION_FIELD`, `INVALID_REVISION`, `SELF_PARENT_REVISION`, `REVISION_DIGEST_MISMATCH` | error | Revision lineage and producer are explicit. `parent_revision_id` is always present and is `null` only for a root. A declared digest matches the content. |
