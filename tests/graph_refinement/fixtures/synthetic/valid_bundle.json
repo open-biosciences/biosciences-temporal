@@ -1,0 +1,74 @@
+{
+  "schema_version": "graph-refinement-bundle/0.1-proposed",
+  "fixture_note": "Synthetic structural fixture. Identifiers are syntactically valid placeholders and the content makes no scientific assertion.",
+  "revision": {
+    "revision_id": "rev-0002",
+    "parent_revision_id": "rev-0001",
+    "created_at": "2026-09-29T00:00:00Z",
+    "producer": {"kind": "model", "id": "synthetic-proposer"}
+  },
+  "scope": {
+    "question": "Synthetic question used only to exercise the validator.",
+    "disease": "MONDO:9999901"
+  },
+  "nodes": [
+    {"id": "HGNC:9999901", "type": "Gene", "label": "GENE_A"},
+    {"id": "HGNC:9999902", "type": "Gene", "label": "GENE_B"},
+    {"id": "CHEMBL:9999901", "type": "Compound", "label": "DRUG_X"},
+    {"id": "MONDO:9999901", "type": "Disease", "label": "DISEASE_Y"},
+    {"id": "COMPOUND:drug-z", "type": "Compound", "label": "DRUG_Z", "id_status": "unresolved"}
+  ],
+  "edges": [
+    {"source": "CHEMBL:9999901", "target": "HGNC:9999902", "type": "inhibits"},
+    {"source": "HGNC:9999901", "target": "HGNC:9999902", "type": "synthetic_lethal_with"}
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-1",
+      "source": "chembl_get_compound",
+      "record_id": "CHEMBL:9999901",
+      "retrieved_at": "2026-09-28T12:00:00Z",
+      "content_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "evidence_id": "ev-2",
+      "source": "biogrid_get_interactions",
+      "record_id": "GENE_A",
+      "retrieved_at": "2026-09-28T12:05:00Z",
+      "content_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "c-1",
+      "subject": "CHEMBL:9999901",
+      "predicate": "inhibits",
+      "object": "HGNC:9999902",
+      "status": "supported",
+      "evidence_ids": ["ev-1"],
+      "qualifiers": {"disease": "MONDO:9999901"},
+      "review": {"disposition": "needs_review", "reviewer_kind": "model", "reviewer_id": "synthetic-reviewer"}
+    },
+    {
+      "claim_id": "c-2",
+      "subject": "HGNC:9999901",
+      "predicate": "synthetic_lethal_with",
+      "object": "HGNC:9999902",
+      "status": "hypothesis",
+      "evidence_ids": ["ev-2"],
+      "qualifiers": {"disease": "MONDO:9999901", "genotype": "GENE_A loss of function"},
+      "review": {"disposition": "pending"}
+    },
+    {
+      "claim_id": "c-3",
+      "subject": "CHEMBL:9999901",
+      "predicate": "candidate_vulnerability_in",
+      "object": "HGNC:9999901",
+      "status": "inference",
+      "derived_from": ["c-1", "c-2"],
+      "evidence_ids": [],
+      "genotype_dependent": true,
+      "qualifiers": {"disease": "MONDO:9999901", "genotype": "GENE_A loss of function"}
+    }
+  ]
+}
