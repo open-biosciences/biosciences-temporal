@@ -1,0 +1,504 @@
+{
+  "competency_question": "Can a drug-response framework that represents both inhibitory and stimulatory signaling, and that uses potency and efficacy in a combined index along with a cohort-level differential index, provide a more accurate basis for interpreting compound activity, comparing responses across diverse dose-response shapes, and identifying genotype-specific vulnerabilities or feedback-driven polarity shifts in high-throughput cancer screening—phenomena that traditional unidirectional metrics such as IC50, EC50, and AUC fail to capture?",
+  "grounding_document": "SL as system level approach- vr 3 (1).docx",
+  "pipeline_version": "fuzzy-to-fact-v1",
+  "generated_at": "2026-03-15",
+  "metadata": {
+    "total_gene_nodes": 12,
+    "total_compound_nodes": 6,
+    "total_pathway_nodes": 8,
+    "total_trial_nodes": 5,
+    "total_edges": 38,
+    "total_disease_associations_RB1": 1299,
+    "total_disease_associations_PTEN": 1917,
+    "total_string_interactions_RB1": 10,
+    "total_string_interactions_PTEN": 10,
+    "total_string_interactions_TP53": 10,
+    "total_string_interactions_CDKN2A": 10,
+    "total_pathways_RB1": 129,
+    "total_pathways_PTEN": 113,
+    "total_pathways_TP53": 295,
+    "total_pathways_CDKN2A": 90,
+    "validation_summary": {
+      "VALIDATED": 23,
+      "INVALID": 0,
+      "UNVERIFIABLE": 0
+    }
+  },
+  "nodes": [
+    {
+      "id": "HGNC:9884",
+      "type": "Gene",
+      "label": "RB1",
+      "properties": {
+        "symbol": "RB1",
+        "name": "RB transcriptional corepressor 1",
+        "ensembl": "ENSG00000139687",
+        "uniprot": "P06400",
+        "location": "13q14.2",
+        "entrez": "5925",
+        "function_summary": "Tumor suppressor, key regulator of G1/S transition. Hypophosphorylated form binds E2F family, prevents E2F-responsive gene transcription. CDK-dependent phosphorylation induces dissociation from E2Fs.",
+        "source": "hgnc_get_gene(HGNC:9884), uniprot_get_protein(UniProtKB:P06400)"
+      }
+    },
+    {
+      "id": "HGNC:9588",
+      "type": "Gene",
+      "label": "PTEN",
+      "properties": {
+        "symbol": "PTEN",
+        "name": "phosphatase and tensin homolog",
+        "ensembl": "ENSG00000171862",
+        "uniprot": "P60484",
+        "location": "10q23.31",
+        "entrez": "5728",
+        "function_summary": "Dual-specificity phosphatase and lipid phosphatase. Antagonizes PI3K-AKT/PKB signaling by dephosphorylating PtdIns(3,4,5)P3. Modulates cell cycle progression and cell survival.",
+        "source": "hgnc_get_gene(HGNC:9588), uniprot_get_protein(UniProtKB:P60484)"
+      }
+    },
+    {
+      "id": "HGNC:11998",
+      "type": "Gene",
+      "label": "TP53",
+      "properties": {
+        "symbol": "TP53",
+        "name": "tumor protein p53",
+        "ensembl": "ENSG00000141510",
+        "uniprot": "P04637",
+        "location": "17p13.1",
+        "entrez": "7157",
+        "function_summary": "Multifunctional transcription factor inducing cell cycle arrest, DNA repair or apoptosis. Acts as tumor suppressor. Apoptosis mediated by stimulation of BAX and FAS expression, or repression of BCL2.",
+        "source": "hgnc_get_gene(HGNC:11998), uniprot_get_protein(UniProtKB:P04637)"
+      }
+    },
+    {
+      "id": "HGNC:1787",
+      "type": "Gene",
+      "label": "CDKN2A",
+      "properties": {
+        "symbol": "CDKN2A",
+        "name": "cyclin dependent kinase inhibitor 2A",
+        "ensembl": "ENSG00000147889",
+        "uniprot": "P42771",
+        "location": "9p21.3",
+        "entrez": "1029",
+        "function_summary": "Negative regulator of cell proliferation. Interacts strongly with CDK4 and CDK6, inhibiting their ability to interact with cyclins D and phosphorylate RB1.",
+        "source": "hgnc_get_gene(HGNC:1787), uniprot_get_protein(UniProtKB:P42771)"
+      }
+    },
+    {
+      "id": "HGNC:1773",
+      "type": "Gene",
+      "label": "CDK4",
+      "properties": {
+        "symbol": "CDK4",
+        "name": "cyclin dependent kinase 4",
+        "ensembl": "ENSG00000135446",
+        "uniprot": "P11802",
+        "location": "12q14.1",
+        "entrez": "1019",
+        "chembl_target": "CHEMBL331",
+        "source": "hgnc_get_gene(HGNC:1773), opentargets_get_target(ENSG00000135446)"
+      }
+    },
+    {
+      "id": "HGNC:391",
+      "type": "Gene",
+      "label": "AKT1",
+      "properties": {
+        "symbol": "AKT1",
+        "name": "AKT serine/threonine kinase 1",
+        "ensembl": "ENSG00000142208",
+        "uniprot": "P31749",
+        "location": "14q32.33",
+        "entrez": "207",
+        "chembl_target": "CHEMBL4282",
+        "source": "hgnc_get_gene(HGNC:391), opentargets_get_target(ENSG00000142208)"
+      }
+    },
+    {
+      "id": "HGNC:8975",
+      "type": "Gene",
+      "label": "PIK3CA",
+      "properties": {
+        "symbol": "PIK3CA",
+        "name": "phosphatidylinositol-4,5-bisphosphate 3-kinase catalytic subunit alpha",
+        "ensembl": "ENSG00000121879",
+        "uniprot": "P42336",
+        "location": "3q26.32",
+        "entrez": "5290",
+        "source": "hgnc_get_gene(HGNC:8975)"
+      }
+    },
+    {
+      "id": "HGNC:6973",
+      "type": "Gene",
+      "label": "MDM2",
+      "properties": {
+        "symbol": "MDM2",
+        "name": "MDM2 proto-oncogene",
+        "ensembl": "ENSG00000135679",
+        "uniprot": "Q00987",
+        "location": "12q15",
+        "entrez": "4193",
+        "source": "hgnc_get_gene(HGNC:6973)"
+      }
+    },
+    {
+      "id": "HGNC:11393",
+      "type": "Gene",
+      "label": "AURKA",
+      "properties": {
+        "symbol": "AURKA",
+        "name": "aurora kinase A",
+        "ensembl": "ENSG00000087586",
+        "uniprot": "O14965",
+        "location": "20q13.2",
+        "entrez": "6790",
+        "chembl_target": "CHEMBL4722",
+        "source": "hgnc_get_gene(HGNC:11393), opentargets_get_target(ENSG00000087586)"
+      }
+    },
+    {
+      "id": "HGNC:6388",
+      "type": "Gene",
+      "label": "KIF11",
+      "properties": {
+        "symbol": "KIF11",
+        "name": "kinesin family member 11",
+        "ensembl": "ENSG00000138160",
+        "uniprot": "P52732",
+        "location": "10q23.33",
+        "entrez": "3832",
+        "chembl_target": "CHEMBL4581",
+        "source": "hgnc_get_gene(HGNC:6388), opentargets_get_target(ENSG00000138160)"
+      }
+    },
+    {
+      "id": "HGNC:9077",
+      "type": "Gene",
+      "label": "PLK1",
+      "properties": {
+        "symbol": "PLK1",
+        "name": "polo like kinase 1",
+        "ensembl": "ENSG00000166851",
+        "uniprot": "P53350",
+        "location": "16p12.2",
+        "entrez": "5347",
+        "chembl_target": "CHEMBL3024",
+        "source": "hgnc_get_gene(HGNC:9077), opentargets_get_target(ENSG00000166851)"
+      }
+    },
+    {
+      "id": "HGNC:3942",
+      "type": "Gene",
+      "label": "MTOR",
+      "properties": {
+        "symbol": "MTOR",
+        "name": "mechanistic target of rapamycin kinase",
+        "ensembl": "ENSG00000198793",
+        "uniprot": "P42345",
+        "location": "1p36.22",
+        "entrez": "2475",
+        "chembl_target": "CHEMBL2842",
+        "source": "hgnc_get_gene(HGNC:3942), opentargets_get_target(ENSG00000198793)"
+      }
+    },
+    {
+      "id": "COMPOUND:MK-2206",
+      "type": "Compound",
+      "label": "MK-2206",
+      "properties": {
+        "mechanism": "AKT inhibitor",
+        "target_gene": "AKT1",
+        "context": "PTEN-mutant lung cancer SL hit (ΔS′ < -4)",
+        "clinical_evidence": "NCT01294306 (completed Phase II NSCLC)",
+        "source": "clinicaltrials_search_trials('MK-2206 AKT inhibitor lung cancer'), clinicaltrials_get_trial(NCT:01294306)"
+      }
+    },
+    {
+      "id": "COMPOUND:palbociclib",
+      "type": "Compound",
+      "label": "Palbociclib",
+      "properties": {
+        "mechanism": "CDK4/CDK6 inhibitor",
+        "target_gene": "CDK4, CDK6",
+        "context": "CDKN2A-mutant lung cancer; CDK4/6 pathway dependency",
+        "clinical_evidence": "NCT03170206 (completed Phase I KRAS-mutant NSCLC with binimetinib)",
+        "source": "clinicaltrials_search_trials('CDK4 CDK6 inhibitor palbociclib lung cancer'), clinicaltrials_get_trial(NCT:03170206)"
+      }
+    },
+    {
+      "id": "COMPOUND:everolimus",
+      "type": "Compound",
+      "label": "Everolimus",
+      "properties": {
+        "mechanism": "mTOR inhibitor (rapalog)",
+        "target_gene": "MTOR",
+        "context": "CDKN2A-mutant SL hit; mTOR/AKT pathway vulnerability",
+        "clinical_evidence": "NCT01470209 (completed Phase I with BKM120 in solid tumors including lung cancer)",
+        "source": "clinicaltrials_search_trials('everolimus mTOR lung cancer'), clinicaltrials_get_trial(NCT:01470209)"
+      }
+    },
+    {
+      "id": "COMPOUND:barasertib",
+      "type": "Compound",
+      "label": "Barasertib",
+      "properties": {
+        "mechanism": "Aurora kinase B inhibitor",
+        "target_gene": "AURKB",
+        "context": "RB1-mutant SL hit (ΔS′ -6.5 to -4.0); mitotic checkpoint vulnerability",
+        "clinical_evidence": "No lung cancer-specific trials found via ClinicalTrials.gov",
+        "source": "clinicaltrials_search_trials('barasertib aurora kinase lung cancer')"
+      }
+    },
+    {
+      "id": "COMPOUND:filanesib",
+      "type": "Compound",
+      "label": "Filanesib",
+      "properties": {
+        "mechanism": "KIF11/Eg5 kinesin inhibitor",
+        "target_gene": "KIF11",
+        "context": "TP53-mutant and CDKN2A-mutant SL hit; spindle checkpoint vulnerability",
+        "clinical_evidence": "No lung cancer-specific trials found via ClinicalTrials.gov",
+        "source": "clinicaltrials_search_trials('filanesib KIF11 lung cancer')"
+      }
+    },
+    {
+      "id": "COMPOUND:olaparib",
+      "type": "Compound",
+      "label": "Olaparib",
+      "properties": {
+        "mechanism": "PARP inhibitor",
+        "target_gene": "PARP1",
+        "context": "RB1-mutant SL hit; replication stress and DNA repair vulnerability",
+        "clinical_evidence": "NCT03155620 (Pediatric MATCH, active), NCT03233204 (completed, DNA repair deficient tumors)",
+        "source": "clinicaltrials_search_trials('olaparib lung cancer RB1')"
+      }
+    },
+    {
+      "id": "WP:WP5434",
+      "type": "Pathway",
+      "label": "Cancer pathways",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["RB1", "PTEN", "TP53", "CDKN2A"],
+        "source": "wikipathways_get_pathways_for_gene(RB1), wikipathways_get_pathways_for_gene(PTEN), wikipathways_get_pathways_for_gene(TP53), wikipathways_get_pathways_for_gene(CDKN2A)"
+      }
+    },
+    {
+      "id": "WP:WP5543",
+      "type": "Pathway",
+      "label": "Hallmark of Cancer: Enabling replicative immortality through non-genotoxic carcinogens",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["RB1", "CDKN2A"],
+        "source": "wikipathways_get_pathways_for_gene(RB1), wikipathways_get_pathways_for_gene(CDKN2A)"
+      }
+    },
+    {
+      "id": "WP:WP4109",
+      "type": "Pathway",
+      "label": "Regulation of mitotic cell cycle",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["RB1"],
+        "source": "wikipathways_get_pathways_for_gene(RB1)"
+      }
+    },
+    {
+      "id": "WP:WP3873",
+      "type": "Pathway",
+      "label": "RIOK1 and RIOK2 in EGFR- and PI3K-mediated tumorigenesis",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["PTEN", "TP53"],
+        "source": "wikipathways_get_pathways_for_gene(PTEN), wikipathways_get_pathways_for_gene(TP53)"
+      }
+    },
+    {
+      "id": "WP:WP3878",
+      "type": "Pathway",
+      "label": "ATM signaling in development and disease",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["TP53"],
+        "source": "wikipathways_get_pathways_for_gene(TP53)"
+      }
+    },
+    {
+      "id": "WP:WP1772",
+      "type": "Pathway",
+      "label": "Apoptosis modulation and signaling",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["CDKN2A"],
+        "source": "wikipathways_get_pathways_for_gene(CDKN2A)"
+      }
+    },
+    {
+      "id": "WP:WP710",
+      "type": "Pathway",
+      "label": "DNA damage response (only ATM dependent)",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["CDKN2A"],
+        "source": "wikipathways_get_pathways_for_gene(CDKN2A)"
+      }
+    },
+    {
+      "id": "WP:WP1775",
+      "type": "Pathway",
+      "label": "Cell cycle checkpoints",
+      "properties": {
+        "organism": "Homo sapiens",
+        "member_genes": ["CDKN2A"],
+        "source": "wikipathways_get_pathways_for_gene(CDKN2A)"
+      }
+    },
+    {
+      "id": "NCT01294306",
+      "type": "Trial",
+      "label": "Phase II MK-2206 + Erlotinib in NSCLC",
+      "properties": {
+        "nct_id": "NCT01294306",
+        "title": "Phase II Trial of the Akt Inhibitor MK-2206 Plus Erlotinib in Advanced NSCLC",
+        "phase": "Phase II",
+        "status": "COMPLETED",
+        "interventions": ["MK-2206", "Erlotinib"],
+        "conditions": ["NSCLC"],
+        "sponsor": "National Cancer Institute (NCI)",
+        "validation": "VALIDATED",
+        "source": "clinicaltrials_get_trial(NCT:01294306)"
+      }
+    },
+    {
+      "id": "NCT03170206",
+      "type": "Trial",
+      "label": "Phase I Palbociclib + Binimetinib in KRAS-mutant NSCLC",
+      "properties": {
+        "nct_id": "NCT03170206",
+        "title": "Phase I Study of CDK4/6 Inhibitor Palbociclib in Combination With MEK Inhibitor Binimetinib for Advanced KRAS Mutant NSCLC",
+        "phase": "Phase I",
+        "status": "COMPLETED",
+        "interventions": ["Palbociclib", "Binimetinib"],
+        "conditions": ["KRAS-mutant NSCLC"],
+        "sponsor": "Dana-Farber Cancer Institute",
+        "validation": "VALIDATED",
+        "source": "clinicaltrials_get_trial(NCT:03170206)"
+      }
+    },
+    {
+      "id": "NCT01470209",
+      "type": "Trial",
+      "label": "Phase I BKM120 + Everolimus in advanced solid tumors",
+      "properties": {
+        "nct_id": "NCT01470209",
+        "title": "A Phase I Study of BKM120 and Everolimus in Advanced Solid Malignancies",
+        "phase": "Phase I",
+        "status": "COMPLETED",
+        "interventions": ["BKM120 (PI3K inhibitor)", "Everolimus (mTOR inhibitor)"],
+        "conditions": ["Solid tumors", "Lung cancer"],
+        "sponsor": "Emory University",
+        "validation": "VALIDATED",
+        "source": "clinicaltrials_get_trial(NCT:01470209)"
+      }
+    },
+    {
+      "id": "NCT03155620",
+      "type": "Trial",
+      "label": "Pediatric MATCH Screening Trial (includes olaparib arm)",
+      "properties": {
+        "nct_id": "NCT03155620",
+        "title": "Targeted Therapy Directed by Genetic Testing in Pediatric Patients (Pediatric MATCH)",
+        "phase": "Phase II",
+        "status": "ACTIVE_NOT_RECRUITING",
+        "interventions": ["Olaparib", "Palbociclib", "multiple targeted agents"],
+        "conditions": ["Advanced solid tumors"],
+        "validation": "VALIDATED",
+        "source": "clinicaltrials_search_trials('olaparib lung cancer RB1')"
+      }
+    },
+    {
+      "id": "NCT02465060",
+      "type": "Trial",
+      "label": "NCI-MATCH Screening Trial (includes palbociclib and taselisib arms)",
+      "properties": {
+        "nct_id": "NCT02465060",
+        "title": "Targeted Therapy in Treating Patients With Advanced Refractory Solid Tumors (NCI-MATCH)",
+        "phase": "Phase II",
+        "status": "ACTIVE_NOT_RECRUITING",
+        "interventions": ["Palbociclib", "Taselisib", "Copanlisib", "Capivasertib", "multiple agents"],
+        "conditions": ["Lung carcinoma", "Advanced solid tumors"],
+        "validation": "VALIDATED",
+        "source": "clinicaltrials_search_trials('CDK4 CDK6 inhibitor palbociclib lung cancer')"
+      }
+    }
+  ],
+  "edges": [
+    {"source": "HGNC:1787", "target": "HGNC:1773", "type": "INHIBITS", "properties": {"mechanism": "CDKN2A directly inhibits CDK4 kinase activity", "score": 0.999, "source": "string_get_interactions(STRING:9606.ENSP00000418915), uniprot_get_protein(UniProtKB:P42771)"}},
+    {"source": "HGNC:1773", "target": "HGNC:9884", "type": "PHOSPHORYLATES", "properties": {"mechanism": "CDK4/cyclin D phosphorylates RB1, releasing E2F", "score": 0.999, "source": "string_get_interactions(STRING:9606.ENSP00000267163), opentargets_get_target(ENSG00000135446)"}},
+    {"source": "HGNC:9588", "target": "HGNC:391", "type": "INHIBITS", "properties": {"mechanism": "PTEN antagonizes PI3K-AKT signaling by dephosphorylating PtdIns(3,4,5)P3", "score": 0.994, "source": "string_get_interactions(STRING:9606.ENSP00000361021), uniprot_get_protein(UniProtKB:P60484)"}},
+    {"source": "HGNC:9588", "target": "HGNC:8975", "type": "ANTAGONIZES", "properties": {"mechanism": "PTEN opposes PI3K catalytic activity by removing D3 phosphate", "score": 0.995, "source": "string_get_interactions(STRING:9606.ENSP00000361021)"}},
+    {"source": "HGNC:391", "target": "HGNC:3942", "type": "ACTIVATES", "properties": {"mechanism": "AKT phosphorylates TSC2, activating mTORC1 signaling", "source": "opentargets_get_target(ENSG00000142208)"}},
+    {"source": "HGNC:11998", "target": "HGNC:6973", "type": "REGULATED_BY", "properties": {"mechanism": "MDM2 ubiquitinates TP53, promoting degradation", "score": 0.999, "source": "string_get_interactions(STRING:9606.ENSP00000269305)"}},
+    {"source": "HGNC:11998", "target": "HGNC:9884", "type": "REGULATES", "properties": {"mechanism": "TP53 and RB1 co-regulate cell cycle arrest pathways", "score": 0.946, "source": "string_get_interactions(STRING:9606.ENSP00000418915)"}},
+    {"source": "HGNC:1787", "target": "HGNC:11998", "type": "COOPERATES_WITH", "properties": {"mechanism": "CDKN2A loss and TP53 mutation co-occur in lung cancer; convergent cell cycle deregulation", "score": 0.946, "source": "string_get_interactions(STRING:9606.ENSP00000418915)"}},
+    {"source": "COMPOUND:MK-2206", "target": "HGNC:391", "type": "INHIBITOR", "properties": {"mechanism": "Allosteric AKT inhibitor", "context": "SL in PTEN-mutant lung cancer (ΔS′ < -4)", "source": "clinicaltrials_get_trial(NCT:01294306)"}},
+    {"source": "COMPOUND:palbociclib", "target": "HGNC:1773", "type": "INHIBITOR", "properties": {"mechanism": "CDK4/CDK6 kinase inhibitor", "context": "SL in CDKN2A-mutant lung cancer", "source": "clinicaltrials_get_trial(NCT:03170206)"}},
+    {"source": "COMPOUND:everolimus", "target": "HGNC:3942", "type": "INHIBITOR", "properties": {"mechanism": "mTOR inhibitor (rapalog)", "context": "SL in CDKN2A-mutant lung cancer; mTOR/AKT pathway", "source": "clinicaltrials_get_trial(NCT:01470209)"}},
+    {"source": "COMPOUND:barasertib", "target": "HGNC:11393", "type": "INHIBITOR", "properties": {"mechanism": "Aurora kinase inhibitor", "context": "SL in RB1-mutant lung cancer (ΔS′ -6.5 to -4.0)"}},
+    {"source": "COMPOUND:filanesib", "target": "HGNC:6388", "type": "INHIBITOR", "properties": {"mechanism": "KIF11/Eg5 kinesin inhibitor", "context": "SL in TP53-mutant lung cancer; spindle checkpoint vulnerability"}},
+    {"source": "COMPOUND:olaparib", "target": "HGNC:9884", "type": "SYNTHETIC_LETHAL_WITH", "properties": {"mechanism": "PARP inhibition in RB1-mutant context creates replication stress SL", "context": "RB1-mutant SL hit for DNA repair vulnerability"}},
+    {"source": "HGNC:9884", "target": "WP:WP5434", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(RB1)"}},
+    {"source": "HGNC:9588", "target": "WP:WP5434", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(PTEN)"}},
+    {"source": "HGNC:11998", "target": "WP:WP5434", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(TP53)"}},
+    {"source": "HGNC:1787", "target": "WP:WP5434", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(CDKN2A)"}},
+    {"source": "HGNC:9884", "target": "WP:WP5543", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(RB1)"}},
+    {"source": "HGNC:1787", "target": "WP:WP5543", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(CDKN2A)"}},
+    {"source": "HGNC:9884", "target": "WP:WP4109", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(RB1)"}},
+    {"source": "HGNC:9588", "target": "WP:WP3873", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(PTEN)"}},
+    {"source": "HGNC:11998", "target": "WP:WP3873", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(TP53)"}},
+    {"source": "HGNC:11998", "target": "WP:WP3878", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(TP53)"}},
+    {"source": "HGNC:1787", "target": "WP:WP1772", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(CDKN2A)"}},
+    {"source": "HGNC:1787", "target": "WP:WP710", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(CDKN2A)"}},
+    {"source": "HGNC:1787", "target": "WP:WP1775", "type": "MEMBER_OF", "properties": {"source": "wikipathways_get_pathways_for_gene(CDKN2A)"}},
+    {"source": "COMPOUND:MK-2206", "target": "NCT01294306", "type": "TESTED_IN", "properties": {"source": "clinicaltrials_get_trial(NCT:01294306)"}},
+    {"source": "COMPOUND:palbociclib", "target": "NCT03170206", "type": "TESTED_IN", "properties": {"source": "clinicaltrials_get_trial(NCT:03170206)"}},
+    {"source": "COMPOUND:everolimus", "target": "NCT01470209", "type": "TESTED_IN", "properties": {"source": "clinicaltrials_get_trial(NCT:01470209)"}},
+    {"source": "COMPOUND:olaparib", "target": "NCT03155620", "type": "TESTED_IN", "properties": {"source": "clinicaltrials_search_trials('olaparib lung cancer RB1')"}},
+    {"source": "COMPOUND:palbociclib", "target": "NCT02465060", "type": "TESTED_IN", "properties": {"source": "clinicaltrials_search_trials('CDK4 CDK6 inhibitor palbociclib lung cancer')"}}
+  ],
+  "sprime_framework_context": {
+    "description": "The S' and ΔS' indices described in the grounding document provide a systems-level drug-response framework. S' integrates potency and efficacy into a single variance-stabilized, direction-preserving index using the inverse hyperbolic sine (asinh) transformation. ΔS' captures genotype-specific shifts between wild-type and mutant cohorts.",
+    "key_findings_from_grounding_document": {
+      "RB1_mutant": {
+        "dominant_vulnerability": "Mitotic/G2M checkpoint (Aurora kinase, PLK inhibitors)",
+        "secondary_axes": ["PI3K/AKT pathway (MK-2206 ΔS'=-6.5)", "DNA replication stress (olaparib, talazoparib)", "Transcriptional/epigenetic (OTX015, belinostat)"],
+        "deepest_hit": "MK-2206 (ΔS' = -6.5)"
+      },
+      "PTEN_mutant": {
+        "dominant_vulnerability": "Multi-axis deep SL (ΔS' -5.6 to -4.2)",
+        "description": "Deep synthetic-lethal responses across PI3K/AKT and multiple signaling axes"
+      },
+      "TP53_mutant": {
+        "dominant_vulnerability": "Spindle checkpoint (KIF11/Eg5 inhibitors)",
+        "description": "Loss of p53-mediated post-mitotic arrest creates dominant vulnerability to spindle poisons"
+      },
+      "CDKN2A_mutant": {
+        "dominant_vulnerability": "Coordinated mitotic + growth signaling + metabolic axes",
+        "key_hits": ["filanesib", "everolimus", "ranitidine", "levonorgestrel"]
+      },
+      "genotype_independent_cytotoxics": {
+        "description": "67 compounds shared across genotypes with S'>4 and ΔS' ≈ 0",
+        "classes": ["Taxanes", "Epothilones", "Camptothecins", "Proteasome inhibitors", "HSP90 inhibitors"]
+      }
+    },
+    "sl_classification_thresholds": {
+      "moderate_SL": "ΔS' ≤ -2, mutant S' ≥ 0",
+      "high_stringency_SL": "ΔS' ≤ -4, mutant S' > 5",
+      "cytotoxic_genotype_independent": "S' > 4 both backgrounds, ΔS' between -0.5 and +0.5",
+      "disinhibition": "S' < 0 (enhanced growth, not inhibition)"
+    }
+  }
+}

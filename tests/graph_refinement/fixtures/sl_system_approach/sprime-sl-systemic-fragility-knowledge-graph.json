@@ -1,0 +1,1417 @@
+{
+  "metadata": {
+    "competency_question": "How can the S\u2032 and \u0394S\u2032 operational-state metrics be used to identify systemic, genotype-dependent synthetic-lethal vulnerabilities\u2014arising from distributed, state-dependent network fragility rather than classical pairwise gene interactions\u2014and to isolate the small subset of perturbations that produce true, high-confidence collapse across PTEN-, CDKN2A-, RB1-, and TP53-mutant lung cancer cells while distinguishing them from genotype-independent cytotoxic responses?",
+    "pipeline_version": "Fuzzy-to-Fact v2",
+    "templates": [
+      "T1:Drug_Discovery",
+      "T2:Gene_Protein_Network",
+      "T6:Mechanism_Elucidation"
+    ],
+    "created": "2026-03-15",
+    "query_number": 2,
+    "node_count": 51,
+    "edge_count": 63,
+    "gene_count": 19,
+    "compound_count": 13,
+    "trial_count": 10,
+    "pathway_count": 6,
+    "disease_count": 1,
+    "framework_count": 2,
+    "validation_summary": {
+      "nct_ids_verified": 10,
+      "nct_ids_invalid": 0,
+      "gene_curies_resolved": 18,
+      "chembl_compounds_resolved": 9,
+      "chembl_targets_resolved": 8
+    },
+    "synapse_grounding_summary": {
+      "datasets_found": 9,
+      "strong": 1,
+      "moderate": 3,
+      "analogous": 4,
+      "weak": 1,
+      "nodes_grounded": 13,
+      "nodes_ungrounded": 38,
+      "grounding_date": "2026-03-15",
+      "note": "Synapse coverage for lung cancer SL is predominantly indirect; strongest grounding from TCGA mutation profiles"
+    }
+  },
+  "nodes": [
+    {
+      "id": "MONDO:0008903",
+      "type": "Disease",
+      "label": "Non-small cell lung carcinoma",
+      "aliases": [
+        "NSCLC",
+        "non-small cell lung cancer"
+      ],
+      "source": "opentargets_get_associations(ENSG00000171862), quality_review_v1_recommendation",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn274449",
+          "name": "TCGA LUAD",
+          "strength": "strong"
+        },
+        {
+          "synapse_id": "syn274452",
+          "name": "TCGA LUSC",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn54951674",
+          "name": "Spatial LUAD Interception",
+          "strength": "moderate"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:9588",
+      "type": "Gene",
+      "role": "primary_tumor_suppressor",
+      "symbol": "PTEN",
+      "name": "phosphatase and tensin homolog",
+      "ensembl": "ENSG00000171862",
+      "uniprot": "P60484",
+      "entrez": "5728",
+      "location": "10q23.31",
+      "function_summary": "Dual-specificity phosphatase; lipid phosphatase removing D3 phosphate from PtdIns(3,4,5)P3. Antagonizes PI3K-AKT/PKB signaling, modulating cell cycle and survival.",
+      "vulnerability_context": "PTEN loss de-represses PI3K-AKT-MTOR axis, creating dependency on AKT, MTOR, and PIK3CA",
+      "chembl_target": "CHEMBL:CHEMBL4282",
+      "source": "hgnc_search_genes('PTEN'), hgnc_get_gene(HGNC:9588), uniprot_get_protein(UniProtKB:P60484)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn274449",
+          "name": "TCGA LUAD",
+          "strength": "strong"
+        },
+        {
+          "synapse_id": "syn274452",
+          "name": "TCGA LUSC",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn351611",
+          "name": "PTEN/Kras/Trp53 ovarian (GSE34882)",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:1787",
+      "type": "Gene",
+      "role": "primary_tumor_suppressor",
+      "symbol": "CDKN2A",
+      "name": "cyclin dependent kinase inhibitor 2A",
+      "ensembl": "ENSG00000147889",
+      "uniprot": "P42771",
+      "entrez": "1029",
+      "location": "9p21.3",
+      "function_summary": "Negative regulator of proliferation; binds CDK4/CDK6 to inhibit cyclin D-dependent RB1 phosphorylation. Also encodes p14ARF which stabilizes TP53.",
+      "vulnerability_context": "CDKN2A loss deregulates CDK4/6-RB1 axis and (via MTAP co-deletion at 9p21) creates PRMT5 dependency",
+      "source": "hgnc_search_genes('CDKN2A'), hgnc_get_gene(HGNC:1787), uniprot_get_protein(UniProtKB:P42771)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn274449",
+          "name": "TCGA LUAD",
+          "strength": "strong"
+        },
+        {
+          "synapse_id": "syn274452",
+          "name": "TCGA LUSC",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn64500888",
+          "name": "PRMT5 in MTAP-deleted NF1 HGG",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:9884",
+      "type": "Gene",
+      "role": "primary_tumor_suppressor",
+      "symbol": "RB1",
+      "name": "RB transcriptional corepressor 1",
+      "ensembl": "ENSG00000139687",
+      "uniprot": "P06400",
+      "entrez": "5925",
+      "location": "13q14.2",
+      "function_summary": "Key G1/S regulator; hypophosphorylated form binds E2F family preventing transcription of S-phase genes. Phosphorylation by CDK4/6 releases E2F.",
+      "vulnerability_context": "RB1 loss removes G1/S checkpoint, creating dependency on G2/M checkpoints (PLK1, AURKA) and mitotic fidelity (KIF11)",
+      "source": "hgnc_search_genes('RB1'), hgnc_get_gene(HGNC:9884), uniprot_get_protein(UniProtKB:P06400)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn274449",
+          "name": "TCGA LUAD",
+          "strength": "strong"
+        },
+        {
+          "synapse_id": "syn17084070",
+          "name": "SCLC Phenotype Transitions",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn21641955",
+          "name": "NF1 SL CRISPR Screen",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:11998",
+      "type": "Gene",
+      "role": "primary_tumor_suppressor",
+      "symbol": "TP53",
+      "name": "tumor protein p53",
+      "ensembl": "ENSG00000141510",
+      "uniprot": "P04637",
+      "entrez": "7157",
+      "location": "17p13.1",
+      "function_summary": "Multifunctional transcription factor inducing cell cycle arrest, DNA repair, or apoptosis. Negatively regulates cell division. Induces BAX/FAS or represses BCL2.",
+      "vulnerability_context": "TP53 loss abolishes G1 checkpoint and DDR-mediated apoptosis, creating dependency on ATR-CHEK1-WEE1 axis for G2/M integrity",
+      "source": "hgnc_search_genes('TP53'), hgnc_get_gene(HGNC:11998), uniprot_get_protein(UniProtKB:P04637)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn274449",
+          "name": "TCGA LUAD",
+          "strength": "strong"
+        },
+        {
+          "synapse_id": "syn274452",
+          "name": "TCGA LUSC",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn359637",
+          "name": "DDR in MLL Leukemia (GSE35038)",
+          "strength": "analogous"
+        },
+        {
+          "synapse_id": "syn351611",
+          "name": "PTEN/Kras/Trp53 ovarian (GSE34882)",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:1773",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "CDK4",
+      "name": "cyclin dependent kinase 4",
+      "ensembl": "ENSG00000135446",
+      "uniprot": "P11802",
+      "entrez": "1019",
+      "location": "12q14.1",
+      "chembl_target": "CHEMBL:CHEMBL331",
+      "drugbank": "DB:DB12001",
+      "genotype_context": "CDKN2A-loss",
+      "source": "hgnc_search_genes('CDK4'), hgnc_get_gene(HGNC:1773), opentargets_get_target(ENSG00000135446)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:1777",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "CDK6",
+      "name": "cyclin dependent kinase 6",
+      "ensembl": "ENSG00000105810",
+      "uniprot": "Q00534",
+      "entrez": "1021",
+      "location": "7q21.2",
+      "genotype_context": "CDKN2A-loss",
+      "source": "hgnc_search_genes('CDK6'), hgnc_get_gene(HGNC:1777)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:1925",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "CHEK1",
+      "name": "checkpoint kinase 1",
+      "ensembl": "ENSG00000149554",
+      "uniprot": "O14757",
+      "entrez": "1111",
+      "location": "11q24.2",
+      "chembl_target": "CHEMBL:CHEMBL4630",
+      "genotype_context": "TP53-loss",
+      "function_summary": "Serine/threonine kinase required for checkpoint-mediated cell cycle arrest and DNA repair activation. Phosphorylates CDC25A/B/C, RAD51, TP53.",
+      "string_id": "STRING:9606.ENSP00000391090",
+      "string_interactions": {
+        "CDC25B": 0.984,
+        "CDC25A_via_CDC25B": 0.938,
+        "CDC25C_via_CDC25B": 0.922,
+        "WEE1_via_CDC25B": 0.9,
+        "RAD51_via_TOPBP1": 0.893,
+        "TOPBP1": 0.846,
+        "TP53_via_TOPBP1": 0.949,
+        "TP53_via_CDC25B": 0.516,
+        "ATR_via_CDC25B": 0.462
+      },
+      "source": "hgnc_search_genes('CHEK1'), hgnc_get_gene(HGNC:1925), opentargets_get_target(ENSG00000149554), string_search_proteins('CHEK1'), string_get_interactions(STRING:9606.ENSP00000391090)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn359637",
+          "name": "DDR in MLL Leukemia (GSE35038)",
+          "strength": "analogous"
+        },
+        {
+          "synapse_id": "syn23668287",
+          "name": "Anti-PD1 DREAM (TMB panel)",
+          "strength": "weak"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:12761",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "WEE1",
+      "name": "WEE1 G2 checkpoint kinase",
+      "ensembl": "ENSG00000166483",
+      "uniprot": "P30291",
+      "entrez": "7465",
+      "location": "11p15.4",
+      "chembl_target": "CHEMBL:CHEMBL5491",
+      "genotype_context": "TP53-loss, CDKN2A+TP53-loss",
+      "function_summary": "Negative regulator of G2-to-M transition; phosphorylates CDK1 on Tyr-15 to prevent premature mitotic entry.",
+      "source": "hgnc_search_genes('WEE1'), hgnc_get_gene(HGNC:12761), opentargets_get_target(ENSG00000166483)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:882",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "ATR",
+      "name": "ATR checkpoint kinase",
+      "ensembl": "ENSG00000175054",
+      "uniprot": "Q13535",
+      "entrez": "545",
+      "location": "3q23",
+      "chembl_target": "CHEMBL:CHEMBL5024",
+      "genotype_context": "TP53-loss",
+      "function_summary": "DNA damage sensor kinase; activates checkpoint signaling upon genotoxic stress. Phosphorylates BRCA1, CHEK1, MCM2, TP53.",
+      "source": "hgnc_get_gene(HGNC:882), opentargets_get_target(ENSG00000175054)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn359637",
+          "name": "DDR in MLL Leukemia (GSE35038)",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:391",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "AKT1",
+      "name": "AKT serine/threonine kinase 1",
+      "ensembl": "ENSG00000142208",
+      "uniprot": "P31749",
+      "entrez": "207",
+      "location": "14q32.33",
+      "chembl_target": "CHEMBL:CHEMBL4282",
+      "genotype_context": "PTEN-loss",
+      "source": "hgnc_search_genes('AKT1'), hgnc_get_gene(HGNC:391), opentargets_get_target(ENSG00000142208)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:8975",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "PIK3CA",
+      "name": "phosphatidylinositol-4,5-bisphosphate 3-kinase catalytic subunit alpha",
+      "ensembl": "ENSG00000121879",
+      "uniprot": "P42336",
+      "entrez": "5290",
+      "location": "3q26.32",
+      "genotype_context": "PTEN-loss",
+      "source": "hgnc_search_genes('PIK3CA'), hgnc_get_gene(HGNC:8975)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:6973",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "MDM2",
+      "name": "MDM2 proto-oncogene",
+      "ensembl": "ENSG00000135679",
+      "uniprot": "Q00987",
+      "entrez": "4193",
+      "location": "12q15",
+      "genotype_context": "TP53-wildtype (disinhibitor, not SL)",
+      "source": "hgnc_search_genes('MDM2'), hgnc_get_gene(HGNC:6973)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn351611",
+          "name": "PTEN/Kras/Trp53 ovarian (GSE34882)",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:11393",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "AURKA",
+      "name": "aurora kinase A",
+      "ensembl": "ENSG00000087586",
+      "uniprot": "O14965",
+      "entrez": "6790",
+      "location": "20q13.2",
+      "genotype_context": "RB1-loss",
+      "source": "hgnc_search_genes('AURKA'), hgnc_get_gene(HGNC:11393)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn17084070",
+          "name": "SCLC Phenotype Transitions",
+          "strength": "moderate"
+        },
+        {
+          "synapse_id": "syn23668287",
+          "name": "Anti-PD1 DREAM (TMB panel)",
+          "strength": "weak"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:9077",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "PLK1",
+      "name": "polo like kinase 1",
+      "ensembl": "ENSG00000166851",
+      "uniprot": "P53350",
+      "entrez": "5347",
+      "location": "16p12.2",
+      "genotype_context": "RB1-loss",
+      "source": "hgnc_search_genes('PLK1'), hgnc_get_gene(HGNC:9077)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn23668287",
+          "name": "Anti-PD1 DREAM (TMB panel)",
+          "strength": "weak"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:3942",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "MTOR",
+      "name": "mechanistic target of rapamycin kinase",
+      "ensembl": "ENSG00000198793",
+      "uniprot": "P42345",
+      "entrez": "2475",
+      "location": "1p36.22",
+      "chembl_target": "CHEMBL:CHEMBL2842",
+      "genotype_context": "PTEN-loss",
+      "source": "hgnc_search_genes('MTOR'), hgnc_get_gene(HGNC:3942), opentargets_get_target(ENSG00000198793)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:6388",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "KIF11",
+      "name": "kinesin family member 11",
+      "ensembl": "ENSG00000138160",
+      "uniprot": "P52732",
+      "entrez": "3832",
+      "location": "10q23.33",
+      "genotype_context": "RB1-loss",
+      "source": "hgnc_search_genes('KIF11'), hgnc_get_gene(HGNC:6388)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:13575",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "BRD4",
+      "name": "bromodomain containing 4",
+      "ensembl": "ENSG00000141867",
+      "uniprot": "O60885",
+      "entrez": "23476",
+      "location": "19p13.12",
+      "chembl_target": "CHEMBL:CHEMBL1163125",
+      "genotype_context": "TP53-loss, RB1-loss (epigenetic vulnerability)",
+      "source": "hgnc_search_genes('BRD4'), hgnc_get_gene(HGNC:13575), opentargets_get_target(ENSG00000141867)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "HGNC:10894",
+      "type": "Gene",
+      "role": "secondary_SL_target",
+      "symbol": "PRMT5",
+      "name": "protein arginine methyltransferase 5",
+      "ensembl": "ENSG00000100462",
+      "uniprot": "O14744",
+      "entrez": "10419",
+      "location": "14q11.2",
+      "chembl_target": "CHEMBL:CHEMBL1795116",
+      "genotype_context": "CDKN2A-loss (via 9p21 MTAP co-deletion)",
+      "source": "hgnc_search_genes('PRMT5'), hgnc_get_gene(HGNC:10894), opentargets_get_target(ENSG00000100462)",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn64500888",
+          "name": "PRMT5 in MTAP-deleted NF1 HGG",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "HGNC:1726",
+      "type": "Gene",
+      "role": "CHEK1_substrate",
+      "symbol": "CDC25B",
+      "name": "cell division cycle 25B",
+      "ensembl": "ENSG00000101224",
+      "uniprot": "P30305",
+      "entrez": "994",
+      "location": "20p13",
+      "function_summary": "M-phase inducer phosphatase; activates CDK1-cyclin B by removing inhibitory phosphorylation. CHEK1 phosphorylates CDC25B to prevent premature CDK1 activation.",
+      "genotype_context": "TP53-loss (CHEK1 substrate in DDR cascade)",
+      "source": "hgnc_search_genes('CDC25B'), hgnc_get_gene(HGNC:1726), string_get_interactions(STRING:9606.ENSP00000391090)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:189963",
+      "type": "Compound",
+      "name": "Palbociclib",
+      "mechanism": "CDK4/6 inhibitor",
+      "target_genes": [
+        "CDK4",
+        "CDK6"
+      ],
+      "genotype_context": "CDKN2A-loss",
+      "SL_classification": "True SL (genotype-dependent)",
+      "source": "chembl_search_compounds('palbociclib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:3544911",
+      "type": "Compound",
+      "name": "Prexasertib",
+      "mechanism": "CHEK1 inhibitor",
+      "target_genes": [
+        "CHEK1"
+      ],
+      "genotype_context": "TP53-loss",
+      "SL_classification": "True SL (genotype-dependent via DDR network fragility)",
+      "source": "chembl_search_compounds('prexasertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:1976040",
+      "type": "Compound",
+      "name": "Adavosertib",
+      "mechanism": "WEE1 inhibitor",
+      "target_genes": [
+        "WEE1"
+      ],
+      "genotype_context": "TP53-loss, CDKN2A+TP53 dual loss",
+      "SL_classification": "True SL (genotype-dependent; strongest in TP53-mutant context)",
+      "source": "chembl_search_compounds('adavosertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:4285417",
+      "type": "Compound",
+      "name": "Ceralasertib",
+      "mechanism": "ATR inhibitor",
+      "target_genes": [
+        "ATR"
+      ],
+      "genotype_context": "TP53-loss",
+      "SL_classification": "True SL (genotype-dependent via DDR network fragility)",
+      "source": "chembl_search_compounds('ceralasertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:2325741",
+      "type": "Compound",
+      "name": "Capivasertib",
+      "mechanism": "AKT1/2/3 inhibitor",
+      "target_genes": [
+        "AKT1"
+      ],
+      "genotype_context": "PTEN-loss",
+      "SL_classification": "True SL (genotype-dependent via PI3K-AKT pathway dependency)",
+      "source": "chembl_search_compounds('capivasertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:1908360",
+      "type": "Compound",
+      "name": "Everolimus",
+      "mechanism": "MTOR inhibitor (mTORC1)",
+      "target_genes": [
+        "MTOR"
+      ],
+      "genotype_context": "PTEN-loss",
+      "SL_classification": "True SL (genotype-dependent via PI3K-AKT-MTOR axis)",
+      "source": "chembl_search_compounds('everolimus')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:521686",
+      "type": "Compound",
+      "name": "Olaparib",
+      "mechanism": "PARP1/2 inhibitor",
+      "target_genes": [
+        "PARP1"
+      ],
+      "genotype_context": "TP53-loss (indirect; DDR impairment context)",
+      "SL_classification": "Requires further genotype stratification; may have cytotoxic component",
+      "source": "chembl_search_compounds('olaparib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:483158",
+      "type": "Compound",
+      "name": "Alisertib",
+      "mechanism": "Aurora kinase A inhibitor",
+      "target_genes": [
+        "AURKA"
+      ],
+      "genotype_context": "RB1-loss",
+      "SL_classification": "True SL (genotype-dependent via mitotic checkpoint dependency)",
+      "source": "chembl_search_compounds('alisertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:4284151",
+      "type": "Compound",
+      "name": "Volasertib",
+      "mechanism": "PLK1 inhibitor",
+      "target_genes": [
+        "PLK1"
+      ],
+      "genotype_context": "RB1-loss",
+      "SL_classification": "True SL (genotype-dependent via mitotic fidelity dependency)",
+      "source": "chembl_search_compounds('volasertib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "COMPOUND:IDE397",
+      "type": "Compound",
+      "name": "IDE397",
+      "mechanism": "MAT2A inhibitor (PRMT5 pathway)",
+      "target_genes": [
+        "PRMT5"
+      ],
+      "genotype_context": "CDKN2A-loss (MTAP co-deletion)",
+      "SL_classification": "True SL (genotype-dependent via MTAP-PRMT5 metabolic vulnerability)",
+      "source": "clinicaltrials_search_trials('PRMT5 inhibitor MTAP')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "COMPOUND:BMS-986504",
+      "type": "Compound",
+      "name": "BMS-986504",
+      "mechanism": "PRMT5 inhibitor",
+      "target_genes": [
+        "PRMT5"
+      ],
+      "genotype_context": "CDKN2A-loss (MTAP co-deletion)",
+      "SL_classification": "True SL (genotype-dependent via MTAP-PRMT5 metabolic vulnerability)",
+      "source": "clinicaltrials_get_trial(NCT:07063745)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:228814",
+      "type": "Compound",
+      "name": "Ispinesib",
+      "mechanism": "KIF11/Eg5 kinesin inhibitor",
+      "target_genes": [
+        "KIF11"
+      ],
+      "genotype_context": "RB1-loss",
+      "SL_classification": "True SL (genotype-dependent via mitotic spindle fidelity dependency)",
+      "source": "chembl_search_compounds('ispinesib'), clinicaltrials_search_trials('ispinesib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "CHEMBL:3581647",
+      "type": "Compound",
+      "name": "Birabresib",
+      "aliases": [
+        "OTX015",
+        "MK-8628"
+      ],
+      "mechanism": "BET bromodomain inhibitor (BRD2/BRD3/BRD4)",
+      "target_genes": [
+        "BRD4"
+      ],
+      "genotype_context": "TP53-loss, RB1-loss (epigenetic vulnerability)",
+      "SL_classification": "True SL (genotype-dependent via BRD4 transcriptional dependency in TP53/RB1-loss contexts)",
+      "source": "chembl_search_compounds('birabresib OTX015'), clinicaltrials_get_trial(NCT:02698176)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:02688907",
+      "type": "Trial",
+      "title": "Phase II AZD1775 in SCLC with CDKN2A+TP53 mutations (SUKSES-C arm)",
+      "drug": "Adavosertib (AZD1775)",
+      "phase": "Phase II",
+      "status": "TERMINATED",
+      "termination_reason": "Lack of efficacy (0/7 objective responses, median PFS 1.3 months)",
+      "enrollment_actual": 7,
+      "sponsor": "Samsung Medical Center",
+      "genotype_selection": "MYC family amplification OR CDKN2A mutation + TP53 mutation",
+      "results_summary": "ORR 0%, SD in 3/7 patients, grade \u22653 AEs 3.2%",
+      "publication": "PMID:32584426 (Cancer 2020, DOI:10.1002/cncr.33048)",
+      "relevance": "Directly tested genotype-dependent SL hypothesis for WEE1 monotherapy; NEGATIVE result \u2014 no objective responses despite biomarker selection",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('WEE1 inhibitor adavosertib'), clinicaltrials_get_trial(NCT:02688907), pubmed(PMID:32584426)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:07063745",
+      "type": "Trial",
+      "title": "Phase 2/3 BMS-986504 + pembrolizumab in NSCLC with MTAP deletion",
+      "drug": "BMS-986504 (PRMT5i)",
+      "phase": "Phase 2/3",
+      "status": "RECRUITING",
+      "sponsor": "Bristol-Myers Squibb",
+      "genotype_selection": "Homozygous MTAP deletion",
+      "relevance": "Tests PRMT5 pathway vulnerability in 9p21-deleted NSCLC (CDKN2A co-deletion context)",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('PRMT5 inhibitor MTAP NSCLC'), clinicaltrials_get_trial(NCT:07063745)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:05941897",
+      "type": "Trial",
+      "title": "Phase II Ceralasertib + Durvalumab in advanced NSCLC",
+      "drug": "Ceralasertib (ATRi) + Durvalumab",
+      "phase": "Phase II",
+      "status": "ACTIVE_NOT_RECRUITING",
+      "sponsor": "AstraZeneca",
+      "relevance": "ATR inhibition in post-immunotherapy NSCLC; DDR network fragility approach",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('ATR inhibitor ceralasertib'), clinicaltrials_get_trial(NCT:05941897)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:02664935",
+      "type": "Trial",
+      "title": "National Lung Matrix Trial",
+      "drug": "Multi-drug (palbociclib, AZD5363/capivasertib, AZD6738/ceralasertib, others)",
+      "phase": "Phase II",
+      "status": "ACTIVE_NOT_RECRUITING",
+      "sponsor": "University of Birmingham / Cancer Research UK",
+      "genotype_selection": "Molecular marker-directed",
+      "relevance": "Genotype-directed multi-arm trial testing multiple SL hypotheses in NSCLC",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('palbociclib CDK4/6 NSCLC'), clinicaltrials_get_trial(NCT:02664935)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:01291017",
+      "type": "Trial",
+      "title": "Phase II Palbociclib in NSCLC with inactive CDKN2A and wildtype RB",
+      "drug": "Palbociclib (PD0332991)",
+      "phase": "Phase II",
+      "status": "COMPLETED",
+      "sponsor": "University of Florida",
+      "genotype_selection": "CDKN2A absent/low + RB wildtype",
+      "relevance": "Directly tests CDKN2A-loss \u2192 CDK4/6 dependency in NSCLC with RB stratification",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('palbociclib CDK4/6 NSCLC'), clinicaltrials_get_trial(NCT:01291017)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:04794699",
+      "type": "Trial",
+      "title": "Phase 1 IDE397 (MAT2A inhibitor) in MTAP-deleted solid tumors",
+      "drug": "IDE397",
+      "phase": "Phase I",
+      "status": "RECRUITING",
+      "sponsor": "IDEAYA Biosciences",
+      "genotype_selection": "Homozygous MTAP deletion",
+      "relevance": "Tests MAT2A/PRMT5 pathway vulnerability in MTAP-deleted tumors (9p21 co-deletion)",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('PRMT5 inhibitor MTAP'), clinicaltrials_get_trial(NCT:04794699)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:04479306",
+      "type": "Trial",
+      "title": "Phase 1b Osimertinib + Alisertib or Sapanisertib in NSCLC",
+      "drug": "Alisertib (AURKAi) + Osimertinib; Sapanisertib (MTORi) + Osimertinib",
+      "phase": "Phase Ib",
+      "status": "COMPLETED",
+      "sponsor": "MD Anderson Cancer Center",
+      "relevance": "Tests AURKA and MTOR inhibition combinations in NSCLC",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('alisertib aurora kinase lung'), clinicaltrials_get_trial(NCT:04479306)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:02593019",
+      "type": "Trial",
+      "title": "Phase II AZD1775 monotherapy in relapsed SCLC",
+      "drug": "Adavosertib (AZD1775)",
+      "phase": "Phase II",
+      "status": "COMPLETED",
+      "sponsor": "Samsung Medical Center",
+      "relevance": "WEE1 inhibition in SCLC (baseline for genotype-unselected comparison)",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('WEE1 inhibitor adavosertib'), clinicaltrials_get_trial(NCT:02593019)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:00085813",
+      "type": "Trial",
+      "title": "Phase II Ispinesib in platinum-refractory/relapsed NSCLC",
+      "drug": "Ispinesib (SB-715992)",
+      "phase": "Phase II",
+      "status": "COMPLETED",
+      "sponsor": "GlaxoSmithKline",
+      "genotype_selection": "Unselected (no RB1 stratification)",
+      "relevance": "KIF11/Eg5 inhibition in NSCLC; provides baseline for future RB1-stratified \u0394S\u2032 analysis",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('ispinesib')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "NCT:02698176",
+      "type": "Trial",
+      "title": "Phase IB Birabresib (MK-8628) in NMC, TNBC, NSCLC, and CRPC",
+      "drug": "Birabresib (MK-8628, OTX015)",
+      "phase": "Phase Ib",
+      "status": "TERMINATED",
+      "sponsor": "Merck Sharp & Dohme",
+      "genotype_selection": "Unselected (no BRD4/TP53/RB1 stratification)",
+      "relevance": "BET/BRD4 inhibition tested in NSCLC arm; terminated (safety/futility context unknown); baseline for future genotype-stratified \u0394S\u2032 analysis",
+      "verified": true,
+      "source": "clinicaltrials_search_trials('BET inhibitor solid tumor'), clinicaltrials_get_trial(NCT:02698176)",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP5434",
+      "type": "Pathway",
+      "title": "Cancer pathways",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "PTEN",
+        "TP53",
+        "RB1",
+        "CDKN2A"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('PTEN'), wikipathways_get_pathways_for_gene('TP53')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP3878",
+      "type": "Pathway",
+      "title": "ATM signaling in development and disease",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "TP53",
+        "ATR",
+        "CHEK1",
+        "ATM"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('TP53')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP710",
+      "type": "Pathway",
+      "title": "DNA damage response (only ATM dependent)",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "CDKN2A",
+        "TP53",
+        "CHEK1",
+        "ATR"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('CDKN2A')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP4109",
+      "type": "Pathway",
+      "title": "Regulation of mitotic cell cycle",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "RB1",
+        "CDK4",
+        "CDK6",
+        "PLK1",
+        "AURKA",
+        "WEE1"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('RB1')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP1775",
+      "type": "Pathway",
+      "title": "Cell cycle checkpoints",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "CDKN2A",
+        "RB1",
+        "TP53",
+        "CHEK1",
+        "WEE1"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('CDKN2A')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "WP:WP3873",
+      "type": "Pathway",
+      "title": "RIOK1 and RIOK2 in EGFR- and PI3K-mediated tumorigenesis",
+      "organism": "Homo sapiens",
+      "genes_in_pathway": [
+        "PTEN",
+        "TP53",
+        "PIK3CA",
+        "AKT1",
+        "MTOR"
+      ],
+      "source": "wikipathways_get_pathways_for_gene('PTEN')",
+      "synapse_grounding": []
+    },
+    {
+      "id": "FRAMEWORK:Sprime",
+      "type": "Framework",
+      "label": "S\u2032 operational-state metric",
+      "description": "Bidirectional dose-response metric measuring operational state under perturbation; high S\u2032 indicates functional capacity, low S\u2032 indicates vulnerability",
+      "source": "grounding_document",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn21641955",
+          "name": "NF1 SL CRISPR Screen (methodology)",
+          "strength": "analogous"
+        }
+      ]
+    },
+    {
+      "id": "FRAMEWORK:DeltaSprime",
+      "type": "Framework",
+      "label": "\u0394S\u2032 differential metric",
+      "description": "Difference in S\u2032 between genotype-specific and wildtype backgrounds; large negative \u0394S\u2032 identifies genotype-dependent vulnerabilities distinguishable from cytotoxic responses",
+      "source": "grounding_document",
+      "synapse_grounding": [
+        {
+          "synapse_id": "syn21641955",
+          "name": "NF1 SL CRISPR Screen (methodology)",
+          "strength": "analogous"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "HGNC:9588",
+      "target": "HGNC:8975",
+      "type": "inhibits",
+      "mechanism": "PTEN dephosphorylates PIP3 antagonizing PIK3CA signaling",
+      "score": 0.995,
+      "source_tool": "string_get_interactions(PTEN)"
+    },
+    {
+      "source": "HGNC:9588",
+      "target": "HGNC:391",
+      "type": "inhibits",
+      "mechanism": "PTEN loss de-represses AKT1 via PIP3 accumulation",
+      "score": 0.971,
+      "source_tool": "string_get_interactions(PTEN)"
+    },
+    {
+      "source": "HGNC:8975",
+      "target": "HGNC:391",
+      "type": "activates",
+      "mechanism": "PIK3CA produces PIP3 activating AKT1",
+      "score": 0.998,
+      "source_tool": "string_get_interactions(PTEN)"
+    },
+    {
+      "source": "HGNC:391",
+      "target": "HGNC:3942",
+      "type": "activates",
+      "mechanism": "AKT1 phosphorylates TSC2 activating MTOR signaling",
+      "score": null,
+      "source_tool": "opentargets_get_target(ENSG00000142208)"
+    },
+    {
+      "source": "HGNC:1787",
+      "target": "HGNC:1773",
+      "type": "inhibits",
+      "mechanism": "CDKN2A/p16 directly binds and inhibits CDK4",
+      "score": 0.999,
+      "source_tool": "string_get_interactions(CDKN2A), uniprot_get_protein(P42771)"
+    },
+    {
+      "source": "HGNC:1787",
+      "target": "HGNC:1777",
+      "type": "inhibits",
+      "mechanism": "CDKN2A/p16 directly binds and inhibits CDK6",
+      "score": 0.999,
+      "source_tool": "string_get_interactions(CDKN2A)"
+    },
+    {
+      "source": "HGNC:1773",
+      "target": "HGNC:9884",
+      "type": "phosphorylates",
+      "mechanism": "CDK4 phosphorylates RB1 releasing E2F",
+      "score": 0.999,
+      "source_tool": "string_get_interactions(CDKN2A), opentargets_get_target(ENSG00000135446)"
+    },
+    {
+      "source": "HGNC:1777",
+      "target": "HGNC:9884",
+      "type": "phosphorylates",
+      "mechanism": "CDK6 phosphorylates RB1 releasing E2F",
+      "score": 0.999,
+      "source_tool": "string_get_interactions(CDKN2A)"
+    },
+    {
+      "source": "HGNC:11998",
+      "target": "HGNC:6973",
+      "type": "regulated_by",
+      "mechanism": "MDM2 ubiquitinates TP53 for proteasomal degradation",
+      "score": 0.999,
+      "source_tool": "string_get_interactions(TP53)"
+    },
+    {
+      "source": "HGNC:6973",
+      "target": "HGNC:9588",
+      "type": "interacts_with",
+      "mechanism": "MDM2-PTEN interaction bridges TP53 and PTEN networks",
+      "score": 0.902,
+      "source_tool": "string_get_interactions(TP53)"
+    },
+    {
+      "source": "HGNC:882",
+      "target": "HGNC:1925",
+      "type": "phosphorylates",
+      "mechanism": "ATR phosphorylates CHEK1 activating checkpoint",
+      "score": 0.96,
+      "source_tool": "string_get_interactions(ATR)"
+    },
+    {
+      "source": "HGNC:882",
+      "target": "HGNC:11998",
+      "type": "phosphorylates",
+      "mechanism": "ATR phosphorylates TP53 at multiple sites",
+      "score": 0.712,
+      "source_tool": "string_get_interactions(ATR), opentargets_get_target(ENSG00000175054)"
+    },
+    {
+      "source": "HGNC:1925",
+      "target": "HGNC:12761",
+      "type": "stabilizes",
+      "mechanism": "CHEK1 phosphorylates FAM122A promoting WEE1 stabilization; CDC25B-WEE1 score 0.900 confirms functional link",
+      "score": 0.9,
+      "source_tool": "opentargets_get_target(ENSG00000149554), string_get_interactions(STRING:9606.ENSP00000391090)"
+    },
+    {
+      "source": "HGNC:1925",
+      "target": "HGNC:1726",
+      "type": "phosphorylates",
+      "mechanism": "CHEK1 directly phosphorylates CDC25B (score 0.984), preventing CDC25B from activating CDK1",
+      "score": 0.984,
+      "source_tool": "string_get_interactions(STRING:9606.ENSP00000391090)"
+    },
+    {
+      "source": "HGNC:12761",
+      "target": "HGNC:9077",
+      "type": "functional_parallel",
+      "mechanism": "WEE1 and PLK1 co-regulate G2/M transition; WEE1 inhibits CDK1, PLK1 activates it",
+      "score": null,
+      "source_tool": "pathway_inference(WP:WP4109)"
+    },
+    {
+      "source": "HGNC:11393",
+      "target": "HGNC:9077",
+      "type": "interacts_with",
+      "mechanism": "AURKA and PLK1 form direct mitotic kinase partnership",
+      "score": 0.997,
+      "source_tool": "string_get_interactions(AURKA)"
+    },
+    {
+      "source": "HGNC:11393",
+      "target": "HGNC:6388",
+      "type": "interacts_with",
+      "mechanism": "AURKA interacts with KIF11/Eg5 in spindle bipolarity network",
+      "score": 0.972,
+      "source_tool": "string_get_interactions(AURKA)"
+    },
+    {
+      "source": "HGNC:11393",
+      "target": "HGNC:11998",
+      "type": "interacts_with",
+      "mechanism": "AURKA-TP53 direct interaction; cross-genotype bridge between RB1-loss and TP53-loss architectures",
+      "score": 0.998,
+      "source_tool": "string_get_interactions(AURKA)"
+    },
+    {
+      "source": "HGNC:8975",
+      "target": "HGNC:11998",
+      "type": "co-occurs_in_network",
+      "mechanism": "PIK3CA-TP53 interaction bridges PI3K and p53 pathways",
+      "score": 0.941,
+      "source_tool": "string_get_interactions(PTEN)"
+    },
+    {
+      "source": "MONDO:0008903",
+      "target": "HGNC:9588",
+      "type": "associated_with",
+      "mechanism": "PTEN loss in NSCLC",
+      "source_tool": "opentargets_get_associations(ENSG00000171862)"
+    },
+    {
+      "source": "MONDO:0008903",
+      "target": "HGNC:11998",
+      "type": "associated_with",
+      "mechanism": "TP53 mutation in NSCLC",
+      "source_tool": "opentargets_get_associations(ENSG00000141510)"
+    },
+    {
+      "source": "MONDO:0008903",
+      "target": "HGNC:1787",
+      "type": "associated_with",
+      "mechanism": "CDKN2A loss/deletion in NSCLC",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "MONDO:0008903",
+      "target": "HGNC:9884",
+      "type": "associated_with",
+      "mechanism": "RB1 loss in NSCLC",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "CHEMBL:189963",
+      "target": "HGNC:1773",
+      "type": "inhibits",
+      "mechanism": "Palbociclib inhibits CDK4",
+      "source_tool": "chembl_search_compounds('palbociclib')"
+    },
+    {
+      "source": "CHEMBL:189963",
+      "target": "HGNC:1777",
+      "type": "inhibits",
+      "mechanism": "Palbociclib inhibits CDK6",
+      "source_tool": "chembl_search_compounds('palbociclib')"
+    },
+    {
+      "source": "CHEMBL:3544911",
+      "target": "HGNC:1925",
+      "type": "inhibits",
+      "mechanism": "Prexasertib inhibits CHEK1",
+      "source_tool": "chembl_search_compounds('prexasertib')"
+    },
+    {
+      "source": "CHEMBL:1976040",
+      "target": "HGNC:12761",
+      "type": "inhibits",
+      "mechanism": "Adavosertib inhibits WEE1",
+      "source_tool": "chembl_search_compounds('adavosertib')"
+    },
+    {
+      "source": "CHEMBL:4285417",
+      "target": "HGNC:882",
+      "type": "inhibits",
+      "mechanism": "Ceralasertib inhibits ATR",
+      "source_tool": "chembl_search_compounds('ceralasertib')"
+    },
+    {
+      "source": "CHEMBL:2325741",
+      "target": "HGNC:391",
+      "type": "inhibits",
+      "mechanism": "Capivasertib inhibits AKT1/2/3",
+      "source_tool": "chembl_search_compounds('capivasertib')"
+    },
+    {
+      "source": "CHEMBL:1908360",
+      "target": "HGNC:3942",
+      "type": "inhibits",
+      "mechanism": "Everolimus inhibits mTORC1",
+      "source_tool": "chembl_search_compounds('everolimus')"
+    },
+    {
+      "source": "CHEMBL:521686",
+      "target": "HGNC:11998",
+      "type": "synthetic_lethal_context",
+      "mechanism": "Olaparib exploits DDR impairment in TP53-mutant context (indirect)",
+      "source_tool": "chembl_search_compounds('olaparib')"
+    },
+    {
+      "source": "CHEMBL:483158",
+      "target": "HGNC:11393",
+      "type": "inhibits",
+      "mechanism": "Alisertib inhibits AURKA",
+      "source_tool": "chembl_search_compounds('alisertib')"
+    },
+    {
+      "source": "CHEMBL:4284151",
+      "target": "HGNC:9077",
+      "type": "inhibits",
+      "mechanism": "Volasertib inhibits PLK1",
+      "source_tool": "chembl_search_compounds('volasertib')"
+    },
+    {
+      "source": "COMPOUND:IDE397",
+      "target": "HGNC:10894",
+      "type": "inhibits_pathway",
+      "mechanism": "IDE397 inhibits MAT2A disrupting PRMT5 substrate supply",
+      "source_tool": "clinicaltrials_get_trial(NCT:04794699)"
+    },
+    {
+      "source": "COMPOUND:BMS-986504",
+      "target": "HGNC:10894",
+      "type": "inhibits",
+      "mechanism": "BMS-986504 directly inhibits PRMT5",
+      "source_tool": "clinicaltrials_get_trial(NCT:07063745)"
+    },
+    {
+      "source": "CHEMBL:228814",
+      "target": "HGNC:6388",
+      "type": "inhibits",
+      "mechanism": "Ispinesib inhibits KIF11/Eg5 kinesin motor protein",
+      "source_tool": "chembl_search_compounds('ispinesib')"
+    },
+    {
+      "source": "CHEMBL:3581647",
+      "target": "HGNC:13575",
+      "type": "inhibits",
+      "mechanism": "Birabresib inhibits BRD4 (and BRD2/BRD3) bromodomain proteins",
+      "source_tool": "chembl_search_compounds('birabresib OTX015')"
+    },
+    {
+      "source": "CHEMBL:189963",
+      "target": "NCT:01291017",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:01291017)"
+    },
+    {
+      "source": "CHEMBL:189963",
+      "target": "NCT:02664935",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:02664935)"
+    },
+    {
+      "source": "CHEMBL:1976040",
+      "target": "NCT:02688907",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:02688907)"
+    },
+    {
+      "source": "CHEMBL:1976040",
+      "target": "NCT:02593019",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:02593019)"
+    },
+    {
+      "source": "CHEMBL:4285417",
+      "target": "NCT:05941897",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:05941897)"
+    },
+    {
+      "source": "CHEMBL:4285417",
+      "target": "NCT:02664935",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:02664935)"
+    },
+    {
+      "source": "COMPOUND:BMS-986504",
+      "target": "NCT:07063745",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:07063745)"
+    },
+    {
+      "source": "COMPOUND:IDE397",
+      "target": "NCT:04794699",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:04794699)"
+    },
+    {
+      "source": "CHEMBL:483158",
+      "target": "NCT:04479306",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:04479306)"
+    },
+    {
+      "source": "CHEMBL:228814",
+      "target": "NCT:00085813",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_search_trials('ispinesib')"
+    },
+    {
+      "source": "CHEMBL:3581647",
+      "target": "NCT:02698176",
+      "type": "tested_in",
+      "source_tool": "clinicaltrials_get_trial(NCT:02698176)"
+    },
+    {
+      "source": "HGNC:9588",
+      "target": "WP:WP5434",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('PTEN')"
+    },
+    {
+      "source": "HGNC:11998",
+      "target": "WP:WP5434",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('TP53')"
+    },
+    {
+      "source": "HGNC:9884",
+      "target": "WP:WP5434",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('RB1')"
+    },
+    {
+      "source": "HGNC:1787",
+      "target": "WP:WP5434",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('CDKN2A')"
+    },
+    {
+      "source": "HGNC:11998",
+      "target": "WP:WP3878",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('TP53')"
+    },
+    {
+      "source": "HGNC:882",
+      "target": "WP:WP3878",
+      "type": "member_of",
+      "source_tool": "pathway_inference"
+    },
+    {
+      "source": "HGNC:9884",
+      "target": "WP:WP4109",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('RB1')"
+    },
+    {
+      "source": "HGNC:1787",
+      "target": "WP:WP710",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('CDKN2A')"
+    },
+    {
+      "source": "HGNC:1787",
+      "target": "WP:WP1775",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('CDKN2A')"
+    },
+    {
+      "source": "HGNC:9588",
+      "target": "WP:WP3873",
+      "type": "member_of",
+      "source_tool": "wikipathways_get_pathways_for_gene('PTEN')"
+    },
+    {
+      "source": "FRAMEWORK:Sprime",
+      "target": "FRAMEWORK:DeltaSprime",
+      "type": "derives",
+      "mechanism": "\u0394S\u2032 = S\u2032(mutant) \u2212 S\u2032(wildtype)",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "FRAMEWORK:DeltaSprime",
+      "target": "HGNC:9588",
+      "type": "classifies_vulnerability",
+      "mechanism": "\u0394S\u2032 identifies PTEN-loss-specific vulnerabilities in PI3K-AKT-MTOR network",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "FRAMEWORK:DeltaSprime",
+      "target": "HGNC:1787",
+      "type": "classifies_vulnerability",
+      "mechanism": "\u0394S\u2032 identifies CDKN2A-loss-specific vulnerabilities in CDK4/6-RB1 and PRMT5 pathways",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "FRAMEWORK:DeltaSprime",
+      "target": "HGNC:9884",
+      "type": "classifies_vulnerability",
+      "mechanism": "\u0394S\u2032 identifies RB1-loss-specific vulnerabilities in G2/M mitotic checkpoint network",
+      "source_tool": "grounding_document"
+    },
+    {
+      "source": "FRAMEWORK:DeltaSprime",
+      "target": "HGNC:11998",
+      "type": "classifies_vulnerability",
+      "mechanism": "\u0394S\u2032 identifies TP53-loss-specific vulnerabilities in ATR-CHEK1-WEE1 DDR network",
+      "source_tool": "grounding_document"
+    }
+  ],
+  "genotype_vulnerability_architectures": {
+    "PTEN_loss": {
+      "primary_gene": "HGNC:9588",
+      "mechanism": "Loss of PIP3 phosphatase de-represses PI3K-AKT-MTOR axis",
+      "network_vulnerabilities": [
+        "AKT1",
+        "MTOR",
+        "PIK3CA"
+      ],
+      "true_SL_drugs": [
+        "Capivasertib (CHEMBL:2325741)",
+        "Everolimus (CHEMBL:1908360)"
+      ],
+      "cytotoxic_filter": "Perturbations with large negative \u0394S\u2032 in PTEN-null vs PTEN-WT are true SL; those with uniformly low S\u2032 in both backgrounds are cytotoxic",
+      "STRING_evidence": "PTEN\u2194PIK3CA (0.995), PIK3CA\u2194AKT1 (0.998), AKT1\u2194MTOR (via TSC2)"
+    },
+    "CDKN2A_loss": {
+      "primary_gene": "HGNC:1787",
+      "mechanism": "Loss of p16/INK4a deregulates CDK4/6-RB1 axis; 9p21 co-deletion of MTAP creates PRMT5 dependency",
+      "network_vulnerabilities": [
+        "CDK4",
+        "CDK6",
+        "PRMT5"
+      ],
+      "true_SL_drugs": [
+        "Palbociclib (CHEMBL:189963)",
+        "IDE397 (MAT2Ai)",
+        "BMS-986504 (PRMT5i)"
+      ],
+      "cytotoxic_filter": "CDK4/6 inhibition selectively arrests CDKN2A-null cells with intact RB; PRMT5/MAT2A inhibition selectively kills MTAP-deleted cells",
+      "STRING_evidence": "CDKN2A\u2194CDK4 (0.999), CDKN2A\u2194CDK6 (0.999), CCND1 hub"
+    },
+    "RB1_loss": {
+      "primary_gene": "HGNC:9884",
+      "mechanism": "Loss of RB1 removes G1/S checkpoint; cells become dependent on G2/M checkpoints and mitotic fidelity",
+      "network_vulnerabilities": [
+        "AURKA",
+        "PLK1",
+        "KIF11"
+      ],
+      "true_SL_drugs": [
+        "Alisertib (CHEMBL:483158)",
+        "Volasertib (CHEMBL:4284151)"
+      ],
+      "cytotoxic_filter": "Mitotic perturbations with large negative \u0394S\u2032 in RB1-null vs RB1-WT are true SL; anti-mitotics that kill equally across genotypes are cytotoxic",
+      "STRING_evidence": "RB1\u2194CCND1 (0.998), CCND1\u2194CDK1 (0.998), CCND1\u2194CDK4 (0.999), CCND1\u2194CDK6 (0.999), CCND1\u2194E2F1 (0.938), AURKA\u2194PLK1 (0.997), AURKA\u2194KIF11 (0.972), AURKA\u2194TP53 (0.998)",
+      "opentargets_evidence": "RB1\u2192SCLC (0.714), RB1\u2192NSCLC (0.503), PLK1\u2192NSCLC (0.146), KIF11\u2192NSCLC (0.115)"
+    },
+    "TP53_loss": {
+      "primary_gene": "HGNC:11998",
+      "mechanism": "Loss of TP53 abolishes G1 arrest and DDR-mediated apoptosis; cells become solely dependent on ATR-CHEK1-WEE1 for genome integrity",
+      "network_vulnerabilities": [
+        "ATR",
+        "CHEK1",
+        "WEE1",
+        "BRD4"
+      ],
+      "true_SL_drugs": [
+        "Prexasertib (CHEMBL:3544911)",
+        "Adavosertib (CHEMBL:1976040)",
+        "Ceralasertib (CHEMBL:4285417)"
+      ],
+      "cytotoxic_filter": "DDR inhibitors with large negative \u0394S\u2032 in TP53-null vs TP53-WT are true SL; DNA-damaging agents with uniformly low S\u2032 are cytotoxic",
+      "STRING_evidence": "TP53\u2194SIRT1 (0.999), MDM2\u2194ATM (0.995), ATR\u2194CHEK1 (0.960), CHEK1\u2194WEE1 (via FAM122A)"
+    }
+  }
+}
