@@ -83,7 +83,7 @@ Agents are defined independently of Temporal so they can be:
 ## Environment Variables
 
 ```bash
-OPENAI_API_KEY=...    # Required — PydanticAI agents call OpenAI
+PYDANTIC_AI_GATEWAY_API_KEY=...  # Required — PydanticAI agents call Claude via the Pydantic AI Gateway
 BIOGRID_API_KEY=...   # Required — BioGRID interaction lookups
 NCBI_API_KEY=...      # Optional — raises NCBI rate limits
 ```

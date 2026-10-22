@@ -11,6 +11,9 @@ from typing import Generic, TypeVar
 
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.models import Model
+from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.providers.gateway import gateway_provider
 from pydantic_ai.usage import UsageLimits
 
 
@@ -60,8 +63,17 @@ BIOSCIENCES_MCP_PATH = _find_sibling_repo()
 # Gateway server module path
 GATEWAY_SERVER = "src/biosciences_mcp/servers/gateway.py"
 
-# Default model for agents
-MODEL = "openai:gpt-4.1-mini"
+# Default model for agents (served through the Pydantic AI Gateway).
+# Override with BIOSCIENCES_MODEL; read once at import time.
+MODEL = os.getenv("BIOSCIENCES_MODEL") or "claude-sonnet-5"
+
+# Pydantic AI Gateway routing: requests go to GATEWAY_BASE_URL/GATEWAY_ROUTE.
+# The upstream provider selects the client transport; the route only names the
+# gateway's provider path. base_url is passed explicitly so a route-qualified
+# PYDANTIC_AI_GATEWAY_BASE_URL in the environment can't double the path.
+GATEWAY_UPSTREAM_PROVIDER = "anthropic"
+GATEWAY_ROUTE = "anthropic-provider"
+GATEWAY_BASE_URL = "https://gateway-us.pydantic.dev/proxy"
 
 # Higher usage limits for complex agents (default is 50 requests)
 USAGE_LIMITS = UsageLimits(request_limit=100)
@@ -88,6 +100,25 @@ def create_mcp_client() -> MCPServerStdio:
         id='biosciences_mcp',
         timeout=120.0,
     )
+
+
+def create_model(model_name: str = MODEL) -> Model:
+    """Create a model that sends requests through the Pydantic AI Gateway.
+
+    Reads the gateway key from PYDANTIC_AI_GATEWAY_API_KEY.
+
+    Args:
+        model_name: Upstream model identifier (default: MODEL constant).
+
+    Returns:
+        AnthropicModel backed by the gateway provider.
+    """
+    provider = gateway_provider(
+        GATEWAY_UPSTREAM_PROVIDER,
+        route=GATEWAY_ROUTE,
+        base_url=GATEWAY_BASE_URL,
+    )
+    return AnthropicModel(model_name, provider=provider)
 
 
 # --- Agent Metadata ---
@@ -156,7 +187,7 @@ class AgentRunner(Generic[T]):
         instructions: str,
         name: str,
         metadata: AgentMetadata,
-        model: str = MODEL,
+        model: Model | str | None = None,
         usage_limits: UsageLimits = USAGE_LIMITS,
     ):
         """Initialize the agent runner.
@@ -166,7 +197,7 @@ class AgentRunner(Generic[T]):
             instructions: System instructions for the agent.
             name: Agent name for Logfire span identification.
             metadata: Structured metadata for tracing.
-            model: Model identifier (default: MODEL constant).
+            model: Model instance or identifier (default: gateway model from create_model()).
             usage_limits: Request limits (default: USAGE_LIMITS constant).
         """
         self.output_type = output_type
@@ -193,7 +224,7 @@ class AgentRunner(Generic[T]):
 
         async with mcp:
             agent = Agent(
-                self.model,
+                self.model if self.model is not None else create_model(),
                 output_type=self.output_type,
                 instructions=self.instructions,
                 name=self.name,

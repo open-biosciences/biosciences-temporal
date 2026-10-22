@@ -8,6 +8,13 @@ Usage:
     uv run python -m src.biosciences_temporal.scripts.run_worker
 """
 
+# Load .env first so LOGFIRE_TOKEN, the gateway key and BIOSCIENCES_MODEL are set
+# before Logfire and the agents (which read MODEL at import) see them.
+# override=True: .env wins over stale shell exports.
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # Configure Logfire before other imports that use Pydantic AI
 import logfire
 
