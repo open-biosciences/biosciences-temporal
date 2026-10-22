@@ -20,6 +20,11 @@ import asyncio
 import os
 import sys
 
+from dotenv import load_dotenv
+
+# override=True: .env wins over stale shell exports.
+load_dotenv(override=True)
+
 # Add parent to path for relative imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 

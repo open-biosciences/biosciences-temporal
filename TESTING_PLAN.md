@@ -29,7 +29,7 @@ Using `MCPServerStdio` instead of `MCPServerStreamableHTTP` should resolve the i
 
 2. **Environment variables set**:
    ```bash
-   export OPENAI_API_KEY=...    # Required for Pydantic AI agents
+   export PYDANTIC_AI_GATEWAY_API_KEY=...  # Required for Pydantic AI agents (via the gateway)
    export BIOGRID_API_KEY=...   # Required for BioGRID interactions
    export NCBI_API_KEY=...      # Optional, for higher rate limits
    ```

@@ -9,6 +9,13 @@ Usage:
     uv run python -m src.biosciences_temporal.scripts.run_agent --gene-a BRCA1 --gene-b PARP1
 """
 
+# Load .env first so LOGFIRE_TOKEN, the gateway key and BIOSCIENCES_MODEL are set
+# before Logfire and the agents (which read MODEL at import) see them.
+# override=True: .env wins over stale shell exports.
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # Configure Logfire before other imports that use Pydantic AI
 import logfire
 
@@ -36,8 +43,8 @@ def main():
     args = parser.parse_args()
 
     # Check environment
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY not set")
+    if not os.environ.get("PYDANTIC_AI_GATEWAY_API_KEY"):
+        print("Error: PYDANTIC_AI_GATEWAY_API_KEY not set")
         sys.exit(1)
 
     # Run workflow

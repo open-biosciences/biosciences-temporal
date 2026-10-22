@@ -58,7 +58,7 @@ Each activity creates its own MCP client, uses it, and closes it within the same
 async def resolve_gene(gene_symbol: str) -> GeneInfo:
     mcp = create_mcp_client()
     async with mcp:
-        agent = Agent(MODEL, instructions=..., output_type=GeneInfo, toolsets=[mcp])
+        agent = Agent(create_model(), instructions=..., output_type=GeneInfo, toolsets=[mcp])
         result = await agent.run(f"Resolve gene: {gene_symbol}")
     return result.output
 
@@ -87,7 +87,7 @@ async def resolve_gene(gene_symbol: str) -> dict:
 docker-compose up -d
 
 # Environment variables
-export OPENAI_API_KEY="sk-..."
+export PYDANTIC_AI_GATEWAY_API_KEY="..."  # Logfire → Gateway credentials
 export BIOGRID_API_KEY="..."  # Free: https://webservice.thebiogrid.org/
 ```
 
@@ -141,7 +141,7 @@ Phase 5: Validate    - Cross-check all claims (parallel)
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `OPENAI_API_KEY` | Yes | Pydantic AI agent LLM calls |
+| `PYDANTIC_AI_GATEWAY_API_KEY` | Yes | Pydantic AI agent LLM calls (Pydantic AI Gateway → Anthropic) |
 | `BIOGRID_API_KEY` | Yes | BioGRID interactions API |
 | `NCBI_API_KEY` | No | Higher NCBI/Entrez rate limits |
 

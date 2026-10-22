@@ -21,7 +21,7 @@ import sys
 from dotenv import load_dotenv
 from logfire.query_client import LogfireQueryClient
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def get_recent_traces(client: LogfireQueryClient, limit: int = 10) -> list:

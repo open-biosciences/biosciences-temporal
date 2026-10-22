@@ -65,7 +65,7 @@ uv run python -m src.scripts.run_workflow -w <workflow-id>  # Resume
 ## Environment Variables
 
 ```bash
-OPENAI_API_KEY=...         # For PydanticAI agents
+PYDANTIC_AI_GATEWAY_API_KEY=...  # For PydanticAI agents (Pydantic AI Gateway → Anthropic)
 BIOGRID_API_KEY=...        # For BioGRID interactions
 NCBI_API_KEY=...           # For higher NCBI rate limits (optional)
 ```
