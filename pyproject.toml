@@ -31,6 +31,11 @@ packages = ["src/biosciences_temporal"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+markers = [
+    "unit: no network, no LLM",
+    "integration: live APIs or MCP servers",
+    "e2e: full workflow runs",
+]
 
 [tool.pyright]
 include = ["src"]
