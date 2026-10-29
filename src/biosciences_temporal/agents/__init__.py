@@ -12,7 +12,7 @@ from .models import (
     ProteinFunction,
     ValidationEvidence,
 )
-from .base import create_mcp_client, MODEL, USAGE_LIMITS
+from .base import create_mcp_client, create_model, MODEL, USAGE_LIMITS
 
 __all__ = [
     # Models
@@ -24,6 +24,7 @@ __all__ = [
     "ValidationEvidence",
     # Utilities
     "create_mcp_client",
+    "create_model",
     "MODEL",
     "USAGE_LIMITS",
 ]

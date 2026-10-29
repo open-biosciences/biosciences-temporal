@@ -65,7 +65,9 @@ uv run python -m src.scripts.run_workflow -w <workflow-id>  # Resume
 ## Environment Variables
 
 ```bash
-OPENAI_API_KEY=...         # For PydanticAI agents
+OPENROUTER_API_KEY=...     # For PydanticAI agents (OpenRouter free tier: nvidia/nemotron-3.5-lightning:free)
+LOGFIRE_TOKEN=...          # For Logfire OpenTelemetry tracing (optional)
+TYPESAFE_API_KEY=...       # For direct TypeSafe Jev decision triage (optional)
 BIOGRID_API_KEY=...        # For BioGRID interactions
 NCBI_API_KEY=...           # For higher NCBI rate limits (optional)
 ```

@@ -1,0 +1,295 @@
+{
+  "workflows": [
+    {
+      "name": "CQ14Workflow",
+      "run": "run",
+      "input": [
+        "input_json: str"
+      ],
+      "returns": "str",
+      "handlers": {},
+      "activities": [
+        {
+          "name": "resolve_gene",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        },
+        {
+          "name": "enrich_protein",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        },
+        {
+          "name": "expand_interactions",
+          "dispatch": "activity",
+          "config": "LONG_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=5)",
+          "schedule_to_close_timeout": "timedelta(minutes=20)"
+        },
+        {
+          "name": "find_drugs",
+          "dispatch": "activity",
+          "config": "LONG_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=5)",
+          "schedule_to_close_timeout": "timedelta(minutes=20)"
+        },
+        {
+          "name": "search_trials",
+          "dispatch": "activity",
+          "config": "LONG_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=5)",
+          "schedule_to_close_timeout": "timedelta(minutes=20)"
+        },
+        {
+          "name": "validate_gene",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        },
+        {
+          "name": "validate_mechanism",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        },
+        {
+          "name": "validate_trial",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        },
+        {
+          "name": "validate_synthetic_lethality",
+          "dispatch": "fanout",
+          "config": "SHORT_ACTIVITY_CONFIG",
+          "timeout": "timedelta(minutes=3)",
+          "schedule_to_close_timeout": "timedelta(minutes=10)"
+        }
+      ]
+    }
+  ],
+  "worker": {
+    "task_queue": "TASK_QUEUE",
+    "workflows": [
+      "CQ14Workflow"
+    ],
+    "activities": [
+      "resolve_gene",
+      "enrich_protein",
+      "expand_interactions",
+      "find_drugs",
+      "search_trials",
+      "validate_gene",
+      "validate_mechanism",
+      "validate_trial",
+      "validate_synthetic_lethality"
+    ],
+    "workflow_runner": "UnsandboxedWorkflowRunner()",
+    "plugins": [
+      "PydanticAIPlugin()",
+      "LogfirePlugin(metrics=False)"
+    ]
+  },
+  "activities": [
+    {
+      "name": "resolve_gene",
+      "module": "temporal/activities",
+      "params": [
+        "gene_symbol: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "resolve_gene"
+    },
+    {
+      "name": "enrich_protein",
+      "module": "temporal/activities",
+      "params": [
+        "uniprot_id: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "enrich_protein"
+    },
+    {
+      "name": "expand_interactions",
+      "module": "temporal/activities",
+      "params": [
+        "gene_symbol: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "expand_interactions"
+    },
+    {
+      "name": "find_drugs",
+      "module": "temporal/activities",
+      "params": [
+        "target_name: str"
+      ],
+      "returns": "list[dict]",
+      "wraps_agent_fn": "find_drugs"
+    },
+    {
+      "name": "search_trials",
+      "module": "temporal/activities",
+      "params": [
+        "drug_name: str",
+        "condition: str"
+      ],
+      "returns": "list[dict]",
+      "wraps_agent_fn": "search_trials"
+    },
+    {
+      "name": "validate_gene",
+      "module": "temporal/activities",
+      "params": [
+        "claim: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "validate_gene"
+    },
+    {
+      "name": "validate_mechanism",
+      "module": "temporal/activities",
+      "params": [
+        "claim: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "validate_drug"
+    },
+    {
+      "name": "validate_trial",
+      "module": "temporal/activities",
+      "params": [
+        "nct_id: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "validate_trial"
+    },
+    {
+      "name": "validate_synthetic_lethality",
+      "module": "temporal/activities",
+      "params": [
+        "gene_a: str",
+        "gene_b: str"
+      ],
+      "returns": "dict",
+      "wraps_agent_fn": "validate_synthetic_lethality"
+    }
+  ],
+  "agents": [
+    {
+      "variable": "_runner",
+      "name": "traverse_drugs",
+      "module": "agents/drugs",
+      "output_type": "list[DrugCandidate]",
+      "phase": "traverse",
+      "action": "drugs",
+      "entity_type": "compound",
+      "source": "ChEMBL",
+      "model_factory": "create_model(agent_name='traverse_drugs')",
+      "model_override_env": "BIOSCIENCES_MODEL_TRAVERSE_DRUGS"
+    },
+    {
+      "variable": "_runner",
+      "name": "enrich_protein",
+      "module": "agents/enrich",
+      "output_type": "ProteinFunction",
+      "phase": "enrich",
+      "action": "protein",
+      "entity_type": "protein",
+      "source": "UniProt",
+      "model_factory": "create_model(agent_name='enrich_protein')",
+      "model_override_env": "BIOSCIENCES_MODEL_ENRICH_PROTEIN"
+    },
+    {
+      "variable": "_runner",
+      "name": "expand_interactions",
+      "module": "agents/expand",
+      "output_type": "list[GeneInteraction]",
+      "phase": "expand",
+      "action": "interactions",
+      "entity_type": "interaction",
+      "source": "STRING,BioGRID",
+      "model_factory": "create_model(agent_name='expand_interactions')",
+      "model_override_env": "BIOSCIENCES_MODEL_EXPAND_INTERACTIONS"
+    },
+    {
+      "variable": "_runner",
+      "name": "anchor_resolve",
+      "module": "agents/resolve",
+      "output_type": "GeneInfo",
+      "phase": "anchor",
+      "action": "resolve",
+      "entity_type": "gene",
+      "source": "HGNC",
+      "model_factory": "create_model(agent_name='anchor_resolve')",
+      "model_override_env": "BIOSCIENCES_MODEL_ANCHOR_RESOLVE"
+    },
+    {
+      "variable": "_runner",
+      "name": "traverse_trials",
+      "module": "agents/trials",
+      "output_type": "list[ClinicalTrial]",
+      "phase": "traverse",
+      "action": "trials",
+      "entity_type": "trial",
+      "source": "ClinicalTrials.gov",
+      "model_factory": "create_model(agent_name='traverse_trials')",
+      "model_override_env": "BIOSCIENCES_MODEL_TRAVERSE_TRIALS"
+    },
+    {
+      "variable": "_gene_runner",
+      "name": "validate_gene",
+      "module": "agents/validate",
+      "output_type": "ValidationEvidence",
+      "phase": "validate",
+      "action": "gene",
+      "entity_type": "gene",
+      "source": "HGNC",
+      "model_factory": "create_model(agent_name='validate_gene')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_GENE"
+    },
+    {
+      "variable": "_drug_runner",
+      "name": "validate_drug",
+      "module": "agents/validate",
+      "output_type": "ValidationEvidence",
+      "phase": "validate",
+      "action": "drug",
+      "entity_type": "compound",
+      "source": "ChEMBL",
+      "model_factory": "create_model(agent_name='validate_drug')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_DRUG"
+    },
+    {
+      "variable": "_trial_runner",
+      "name": "validate_trial",
+      "module": "agents/validate",
+      "output_type": "ValidationEvidence",
+      "phase": "validate",
+      "action": "trial",
+      "entity_type": "trial",
+      "source": "ClinicalTrials.gov",
+      "model_factory": "create_model(agent_name='validate_trial')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_TRIAL"
+    },
+    {
+      "variable": "_sl_runner",
+      "name": "validate_sl",
+      "module": "agents/validate",
+      "output_type": "ValidationEvidence",
+      "phase": "validate",
+      "action": "sl",
+      "entity_type": "gene_pair",
+      "source": "BioGRID",
+      "model_factory": "create_model(agent_name='validate_sl')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_SL"
+    }
+  ]
+}

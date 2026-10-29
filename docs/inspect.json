@@ -1,0 +1,495 @@
+{
+  "metadata": {
+    "name": "biosciences-temporal",
+    "version": "0.1.0",
+    "description": "Temporal workflows for biosciences research using Pydantic AI and MCP",
+    "requires_python": ">=3.11"
+  },
+  "dependencies": {
+    "runtime": [
+      "pydantic>=2.0",
+      "pydantic-ai[temporal]>=1.42.0",
+      "temporalio>=1.5.0",
+      "httpx>=0.27",
+      "logfire>=4.18.0",
+      "python-dotenv>=1.0"
+    ],
+    "optional": {
+      "dev": [
+        "pytest>=8.0",
+        "pytest-asyncio>=0.23",
+        "ruff>=0.8",
+        "pyright>=1.1"
+      ]
+    }
+  },
+  "temporal": {
+    "default_task_queue": "biosciences-task-queue",
+    "workflow_runner": "UnsandboxedWorkflowRunner",
+    "non_retryable_error_types": [
+      "UNRESOLVED_ENTITY",
+      "AMBIGUOUS_QUERY",
+      "ENTITY_NOT_FOUND",
+      "ValidationError"
+    ]
+  },
+  "connectors": {
+    "openrouter_and_typesafe": {
+      "primary_model": "nvidia/nemotron-3.5-lightning:free",
+      "fallback_model": "openrouter/free",
+      "typesafe_model": "jev-latest",
+      "offline_fallback": "TestModel",
+      "env_vars": [
+        "OPENROUTER_API_KEY",
+        "OPENROUTER_FREE_MODEL",
+        "OPENROUTER_FALLBACK_MODEL",
+        "TYPESAFE_API_KEY",
+        "TYPESAFE_MODEL_NAME",
+        "LOGFIRE_TOKEN",
+        "USE_TEST_MODEL"
+      ],
+      "request_limit": 100
+    },
+    "mcp_stdio": {
+      "id": "biosciences_mcp",
+      "transport": "MCPServerStdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "fastmcp",
+        "run",
+        "src/biosciences_mcp/servers/gateway.py"
+      ],
+      "sibling_repo": "biosciences-mcp",
+      "override_env_var": "BIOSCIENCES_MCP_PATH",
+      "timeout_seconds": 120.0,
+      "lifecycle": "one-shot per activity task"
+    }
+  },
+  "agents": [
+    {
+      "name": "anchor_resolve",
+      "module": "biosciences_temporal.agents.resolve",
+      "output_model": "GeneInfo",
+      "model_factory": "create_model(agent_name='anchor_resolve')",
+      "model_override_env": "BIOSCIENCES_MODEL_ANCHOR_RESOLVE",
+      "metadata": {
+        "phase": "anchor",
+        "action": "resolve",
+        "entity_type": "gene",
+        "source": "HGNC",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "enrich_protein",
+      "module": "biosciences_temporal.agents.enrich",
+      "output_model": "ProteinFunction",
+      "model_factory": "create_model(agent_name='enrich_protein')",
+      "model_override_env": "BIOSCIENCES_MODEL_ENRICH_PROTEIN",
+      "metadata": {
+        "phase": "enrich",
+        "action": "protein",
+        "entity_type": "protein",
+        "source": "UniProt",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "expand_interactions",
+      "module": "biosciences_temporal.agents.expand",
+      "output_model": "list[GeneInteraction]",
+      "model_factory": "create_model(agent_name='expand_interactions')",
+      "model_override_env": "BIOSCIENCES_MODEL_EXPAND_INTERACTIONS",
+      "metadata": {
+        "phase": "expand",
+        "action": "interactions",
+        "entity_type": "interaction",
+        "source": "STRING,BioGRID",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "traverse_drugs",
+      "module": "biosciences_temporal.agents.drugs",
+      "output_model": "list[DrugCandidate]",
+      "model_factory": "create_model(agent_name='traverse_drugs')",
+      "model_override_env": "BIOSCIENCES_MODEL_TRAVERSE_DRUGS",
+      "metadata": {
+        "phase": "traverse",
+        "action": "drugs",
+        "entity_type": "compound",
+        "source": "ChEMBL",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "traverse_trials",
+      "module": "biosciences_temporal.agents.trials",
+      "output_model": "list[ClinicalTrial]",
+      "model_factory": "create_model(agent_name='traverse_trials')",
+      "model_override_env": "BIOSCIENCES_MODEL_TRAVERSE_TRIALS",
+      "metadata": {
+        "phase": "traverse",
+        "action": "trials",
+        "entity_type": "trial",
+        "source": "ClinicalTrials.gov",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "validate_gene",
+      "module": "biosciences_temporal.agents.validate",
+      "output_model": "ValidationEvidence",
+      "model_factory": "create_model(agent_name='validate_gene')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_GENE",
+      "metadata": {
+        "phase": "validate",
+        "action": "gene",
+        "entity_type": "gene",
+        "source": "HGNC",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "validate_drug",
+      "module": "biosciences_temporal.agents.validate",
+      "output_model": "ValidationEvidence",
+      "model_factory": "create_model(agent_name='validate_drug')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_DRUG",
+      "metadata": {
+        "phase": "validate",
+        "action": "drug",
+        "entity_type": "compound",
+        "source": "ChEMBL",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "validate_trial",
+      "module": "biosciences_temporal.agents.validate",
+      "output_model": "ValidationEvidence",
+      "model_factory": "create_model(agent_name='validate_trial')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_TRIAL",
+      "metadata": {
+        "phase": "validate",
+        "action": "trial",
+        "entity_type": "trial",
+        "source": "ClinicalTrials.gov",
+        "cq_id": "cq14"
+      }
+    },
+    {
+      "name": "validate_sl",
+      "module": "biosciences_temporal.agents.validate",
+      "output_model": "ValidationEvidence",
+      "model_factory": "create_model(agent_name='validate_sl')",
+      "model_override_env": "BIOSCIENCES_MODEL_VALIDATE_SL",
+      "metadata": {
+        "phase": "validate",
+        "action": "sl",
+        "entity_type": "gene_pair",
+        "source": "BioGRID",
+        "cq_id": "cq14"
+      }
+    }
+  ],
+  "models": {
+    "GeneInfo": {
+      "description": "Resolved gene information from HGNC.",
+      "properties": {
+        "hgnc_id": {
+          "title": "Hgnc Id",
+          "type": "string"
+        },
+        "symbol": {
+          "title": "Symbol",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "entrez_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entrez Id"
+        },
+        "uniprot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uniprot Id"
+        },
+        "ensembl_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ensembl Id"
+        }
+      },
+      "required": [
+        "hgnc_id",
+        "symbol",
+        "name"
+      ],
+      "title": "GeneInfo",
+      "type": "object"
+    },
+    "ProteinFunction": {
+      "description": "Protein functional context from UniProt.",
+      "properties": {
+        "uniprot_id": {
+          "title": "Uniprot Id",
+          "type": "string"
+        },
+        "function_summary": {
+          "title": "Function Summary",
+          "type": "string"
+        },
+        "keywords": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Keywords",
+          "type": "array"
+        }
+      },
+      "required": [
+        "uniprot_id",
+        "function_summary"
+      ],
+      "title": "ProteinFunction",
+      "type": "object"
+    },
+    "GeneInteraction": {
+      "description": "Gene-gene or protein-protein interaction.",
+      "properties": {
+        "partner_gene": {
+          "title": "Partner Gene",
+          "type": "string"
+        },
+        "interaction_type": {
+          "title": "Interaction Type",
+          "type": "string"
+        },
+        "evidence_source": {
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "pubmed_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pubmed Id"
+        }
+      },
+      "required": [
+        "partner_gene",
+        "interaction_type",
+        "evidence_source"
+      ],
+      "title": "GeneInteraction",
+      "type": "object"
+    },
+    "DrugCandidate": {
+      "description": "Drug candidate from ChEMBL.",
+      "properties": {
+        "chembl_id": {
+          "title": "Chembl Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "target_name": {
+          "title": "Target Name",
+          "type": "string"
+        },
+        "mechanism": {
+          "title": "Mechanism",
+          "type": "string"
+        },
+        "max_phase": {
+          "title": "Max Phase",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "chembl_id",
+        "name",
+        "target_name",
+        "mechanism",
+        "max_phase"
+      ],
+      "title": "DrugCandidate",
+      "type": "object"
+    },
+    "ClinicalTrial": {
+      "description": "Clinical trial from ClinicalTrials.gov.",
+      "properties": {
+        "nct_id": {
+          "title": "Nct Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "phase": {
+          "title": "Phase",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "conditions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "interventions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Interventions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nct_id",
+        "title",
+        "phase",
+        "status"
+      ],
+      "title": "ClinicalTrial",
+      "type": "object"
+    },
+    "ValidationEvidence": {
+      "description": "Validation evidence for a claim.",
+      "properties": {
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "verified": {
+          "title": "Verified",
+          "type": "boolean"
+        },
+        "evidence_source": {
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_details": {
+          "title": "Evidence Details",
+          "type": "string"
+        },
+        "pubmed_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Pubmed Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim",
+        "verified",
+        "evidence_source",
+        "evidence_details"
+      ],
+      "title": "ValidationEvidence",
+      "type": "object"
+    }
+  },
+  "cli_scripts": [
+    {
+      "script": "query_logfire",
+      "module": "src.biosciences_temporal.scripts.query_logfire",
+      "help": "Query Logfire traces for CQ14 workflow analysis.",
+      "options": [
+        "--limit",
+        "-n",
+        "--sql",
+        "--type",
+        "--format"
+      ]
+    },
+    {
+      "script": "run_agent",
+      "module": "src.biosciences_temporal.scripts.run_agent",
+      "help": "Run CQ14 workflow standalone (no Temporal).",
+      "options": [
+        "--gene-a",
+        "--gene-b",
+        "--output",
+        "-o"
+      ]
+    },
+    {
+      "script": "run_worker",
+      "module": "src.biosciences_temporal.scripts.run_worker",
+      "help": "Start the Temporal worker for CQ14 workflow.",
+      "options": []
+    },
+    {
+      "script": "run_workflow",
+      "module": "src.biosciences_temporal.scripts.run_workflow",
+      "help": "Trigger CQ14 workflow via Temporal.",
+      "options": [
+        "--gene-a",
+        "--gene-b",
+        "--target-name",
+        "--condition",
+        "-w",
+        "--workflow-id",
+        "--no-wait"
+      ]
+    }
+  ]
+}

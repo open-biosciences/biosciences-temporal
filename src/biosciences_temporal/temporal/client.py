@@ -10,9 +10,8 @@ import uuid
 from dataclasses import asdict
 from typing import Optional
 
-from temporalio.client import Client
-
-from ..config import TASK_QUEUE
+from ..config import TASK_QUEUE, TEMPORAL_ADDRESS
+from .connection import connect
 from .workflows import CQ14Input, CQ14Workflow
 
 
@@ -35,7 +34,7 @@ async def start_workflow(
     Returns:
         The workflow ID.
     """
-    client = await Client.connect("localhost:7233")
+    client = await connect(TEMPORAL_ADDRESS)
 
     if workflow_id is None:
         workflow_id = f"cq14-{gene_a}-{gene_b}-{uuid.uuid4().hex[:8]}"
@@ -69,7 +68,7 @@ async def get_result(workflow_id: str) -> str:
     Returns:
         The workflow result as JSON.
     """
-    client = await Client.connect("localhost:7233")
+    client = await connect(TEMPORAL_ADDRESS)
 
     handle = client.get_workflow_handle(workflow_id)
     result = await handle.result()

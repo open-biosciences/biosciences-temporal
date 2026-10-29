@@ -11,18 +11,18 @@ non-deterministic work (LLM calls, API calls) happens in activities.
 
 import asyncio
 
-from temporalio.client import Client
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from ..config import TASK_QUEUE
+from ..config import TASK_QUEUE, TEMPORAL_ADDRESS
 from .activities import ALL_ACTIVITIES
+from .connection import connect
 from .workflows import CQ14Workflow
 
 
 async def main():
     """Start the Temporal worker."""
-    print(f"Connecting to Temporal at localhost:7233...")
-    client = await Client.connect("localhost:7233")
+    print(f"Connecting to Temporal at {TEMPORAL_ADDRESS}...")
+    client = await connect(TEMPORAL_ADDRESS)
 
     print(f"Starting worker on task queue: {TASK_QUEUE}")
     print(f"Registered workflow: CQ14Workflow")

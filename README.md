@@ -83,9 +83,11 @@ Agents are defined independently of Temporal so they can be:
 ## Environment Variables
 
 ```bash
-OPENAI_API_KEY=...    # Required — PydanticAI agents call OpenAI
-BIOGRID_API_KEY=...   # Required — BioGRID interaction lookups
-NCBI_API_KEY=...      # Optional — raises NCBI rate limits
+OPENROUTER_API_KEY=...  # Required — PydanticAI agents call OpenRouter free tier (nvidia/nemotron-3.5-lightning:free)
+LOGFIRE_TOKEN=...       # Optional — Logfire OpenTelemetry tracing across Temporal + PydanticAI
+TYPESAFE_API_KEY=...    # Optional — Direct TypeSafe Jev decision model
+BIOGRID_API_KEY=...     # Required — BioGRID interaction lookups
+NCBI_API_KEY=...        # Optional — raises NCBI rate limits
 ```
 
 ## Known Issues

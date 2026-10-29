@@ -11,6 +11,8 @@ from typing import Generic, TypeVar
 
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.models import Model
+from pydantic_ai.models.test import TestModel
 from pydantic_ai.usage import UsageLimits
 
 
@@ -60,8 +62,18 @@ BIOSCIENCES_MCP_PATH = _find_sibling_repo()
 # Gateway server module path
 GATEWAY_SERVER = "src/biosciences_mcp/servers/gateway.py"
 
-# Default model for agents
-MODEL = "openai:gpt-4.1-mini"
+# Default OpenRouter free-tier models for agents ($0 token spend).
+# nvidia/nemotron-3.5-lightning:free supports both native tool calling and structured Pydantic output.
+OPENROUTER_FREE_MODEL = (
+    os.getenv("OPENROUTER_FREE_MODEL")
+    or os.getenv("BIOSCIENCES_MODEL")
+    or "nvidia/nemotron-3.5-lightning:free"
+)
+OPENROUTER_FALLBACK_MODEL = os.getenv("OPENROUTER_FALLBACK_MODEL") or "openrouter/free"
+TYPESAFE_MODEL_NAME = os.getenv("TYPESAFE_MODEL_NAME") or "jev-latest"
+
+# Alias preserved for package exports
+MODEL = OPENROUTER_FREE_MODEL
 
 # Higher usage limits for complex agents (default is 50 requests)
 USAGE_LIMITS = UsageLimits(request_limit=100)
@@ -88,6 +100,61 @@ def create_mcp_client() -> MCPServerStdio:
         id='biosciences_mcp',
         timeout=120.0,
     )
+
+
+def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> Model:
+    """Create the PydanticAI model with OpenRouter free-tier and offline fallback.
+
+    Resolution order:
+    1. TestModel() if USE_TEST_MODEL is true.
+    2. Optional TypeSafe (Jev) decision model if TYPESAFE_API_KEY and typesafe-sdk are available.
+    3. Per-agent override BIOSCIENCES_MODEL_<AGENT_NAME_UPPER> (if agent_name is given),
+       otherwise model_name (OPENROUTER_FREE_MODEL), with fallback to OPENROUTER_FALLBACK_MODEL
+       if OPENROUTER_API_KEY is set.
+    4. TestModel() fallback when no API keys are present (offline development / tests).
+
+    Args:
+        model_name: Primary OpenRouter model identifier (default: MODEL constant).
+        agent_name: Optional AgentRunner.name to look up BIOSCIENCES_MODEL_<AGENT_NAME_UPPER>.
+
+    Returns:
+        Configured Model (or FallbackModel / TestModel).
+    """
+    if os.getenv("USE_TEST_MODEL", "").lower() in ("1", "true", "yes"):
+        return TestModel()
+
+    effective_model = model_name
+    if agent_name:
+        env_override = os.getenv(f"BIOSCIENCES_MODEL_{agent_name.upper()}")
+        if env_override:
+            effective_model = env_override
+
+    models: list[Model] = []
+
+    if os.getenv("TYPESAFE_API_KEY"):
+        try:
+            from pydantic_ai.models.typesafe import TypeSafeModel  # type: ignore[import-not-found]
+
+            models.append(TypeSafeModel(TYPESAFE_MODEL_NAME))
+        except Exception:
+            pass
+
+    if os.getenv("OPENROUTER_API_KEY"):
+        from pydantic_ai.models.openrouter import OpenRouterModel
+
+        models.append(OpenRouterModel(effective_model))
+        if OPENROUTER_FALLBACK_MODEL and OPENROUTER_FALLBACK_MODEL != effective_model:
+            models.append(OpenRouterModel(OPENROUTER_FALLBACK_MODEL))
+
+    if not models:
+        return TestModel()
+
+    if len(models) == 1:
+        return models[0]
+
+    from pydantic_ai.models.fallback import FallbackModel
+
+    return FallbackModel(*models)
 
 
 # --- Agent Metadata ---
@@ -156,7 +223,7 @@ class AgentRunner(Generic[T]):
         instructions: str,
         name: str,
         metadata: AgentMetadata,
-        model: str = MODEL,
+        model: Model | str | None = None,
         usage_limits: UsageLimits = USAGE_LIMITS,
     ):
         """Initialize the agent runner.
@@ -166,7 +233,7 @@ class AgentRunner(Generic[T]):
             instructions: System instructions for the agent.
             name: Agent name for Logfire span identification.
             metadata: Structured metadata for tracing.
-            model: Model identifier (default: MODEL constant).
+            model: Model instance or identifier (default: gateway model from create_model()).
             usage_limits: Request limits (default: USAGE_LIMITS constant).
         """
         self.output_type = output_type
@@ -193,7 +260,7 @@ class AgentRunner(Generic[T]):
 
         async with mcp:
             agent = Agent(
-                self.model,
+                self.model if self.model is not None else create_model(agent_name=self.name),
                 output_type=self.output_type,
                 instructions=self.instructions,
                 name=self.name,

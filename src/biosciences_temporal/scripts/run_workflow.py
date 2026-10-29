@@ -20,10 +20,22 @@ import asyncio
 import os
 import sys
 
+from dotenv import load_dotenv
+import logfire
+
+# override=True: .env wins over stale shell exports.
+load_dotenv(override=True)
+
+if os.getenv("LOGFIRE_TOKEN"):
+    logfire.configure(token=os.getenv("LOGFIRE_TOKEN"), service_name="biosciences-temporal")
+else:
+    logfire.configure(send_to_logfire=False, service_name="biosciences-temporal")
+logfire.instrument_pydantic_ai()
+
 # Add parent to path for relative imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from src.biosciences_temporal.temporal.client import start_workflow, get_result
+from src.biosciences_temporal.temporal.client import start_workflow, get_result  # noqa: E402
 
 
 async def main():
