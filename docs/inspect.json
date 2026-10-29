@@ -27,7 +27,7 @@
   },
   "temporal": {
     "default_task_queue": "biosciences-task-queue",
-    "workflow_runner": "UnsandboxedWorkflowRunner",
+    "workflow_runner": "SandboxedWorkflowRunner",
     "non_retryable_error_types": [
       "UNRESOLVED_ENTITY",
       "AMBIGUOUS_QUERY",

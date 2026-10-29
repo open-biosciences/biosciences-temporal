@@ -1,22 +1,27 @@
 """
 Temporal worker for CQ14 workflow.
 
-Registers workflows and activities, then polls the task queue for work.
-
-NOTE: Workflow sandboxing is disabled because pydantic_ai imports anyio/sniffio
-which are not compatible with Temporal's deterministic sandbox. The workflow
-itself is deterministic (just orchestrates activity calls), and all
-non-deterministic work (LLM calls, API calls) happens in activities.
+Registers workflows and activities with Temporal's deterministic workflow sandbox
+(`SandboxedWorkflowRunner`), then polls the task queue for work.
 """
 
 import asyncio
 
-from temporalio.worker import UnsandboxedWorkflowRunner, Worker
+from temporalio.worker import Worker
+from temporalio.worker.workflow_sandbox import SandboxedWorkflowRunner, SandboxRestrictions
 
 from ..config import TASK_QUEUE, TEMPORAL_ADDRESS
 from .activities import ALL_ACTIVITIES
 from .connection import connect
 from .workflows import CQ14Workflow
+
+# Pass through config and beartype (used by fastmcp) alongside PydanticAIPlugin's
+# automatic passthroughs so CQ14Workflow runs inside Temporal's deterministic sandbox.
+WORKFLOW_RUNNER = SandboxedWorkflowRunner(
+    restrictions=SandboxRestrictions.default.with_passthrough_modules(
+        "biosciences_temporal.config", "beartype"
+    )
+)
 
 
 async def main():
@@ -28,18 +33,15 @@ async def main():
     print("Registered workflow: CQ14Workflow")
     print(f"Registered activities: {len(ALL_ACTIVITIES)}")
 
-    # Use UnsandboxedWorkflowRunner because pydantic_ai imports anyio/sniffio
-    # which are incompatible with Temporal's deterministic sandbox.
-    # Our workflow is deterministic - all non-deterministic work is in activities.
     worker = Worker(
         client,
         task_queue=TASK_QUEUE,
         workflows=[CQ14Workflow],
         activities=ALL_ACTIVITIES,
-        workflow_runner=UnsandboxedWorkflowRunner(),
+        workflow_runner=WORKFLOW_RUNNER,
     )
 
-    print("Worker running (sandbox disabled). Press Ctrl+C to stop.")
+    print("Worker running (sandbox enabled). Press Ctrl+C to stop.")
     await worker.run()
 
 

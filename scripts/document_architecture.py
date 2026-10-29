@@ -148,7 +148,7 @@ def manifest(root: Path) -> dict:
         },
         "temporal": {
             "default_task_queue": TASK_QUEUE,
-            "workflow_runner": "UnsandboxedWorkflowRunner",
+            "workflow_runner": "SandboxedWorkflowRunner",
             "non_retryable_error_types": NON_RETRYABLE_ERRORS,
         },
         "connectors": {

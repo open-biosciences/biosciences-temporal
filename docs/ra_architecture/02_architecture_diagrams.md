@@ -22,7 +22,7 @@ flowchart TD
         TQ["Task Queue: biosciences-task-queue"]
     end
 
-    subgraph Worker ["Temporal Worker (UnsandboxedWorkflowRunner)"]
+    subgraph Worker ["Temporal Worker (SandboxedWorkflowRunner)"]
         WF["CQ14Workflow<br/>(5-Phase Fuzzy-to-Fact Protocol)"]
         ACT["ALL_ACTIVITIES<br/>(resolve_gene, enrich_protein, expand_interactions,<br/>find_drugs, search_trials, validate_gene,<br/>validate_mechanism, validate_trial,<br/>validate_synthetic_lethality)"]
         RUN["AgentRunner[T] (agents/base.py)<br/>(anchor_resolve, enrich_protein, expand_interactions,<br/>traverse_drugs, traverse_trials, validate_gene,<br/>validate_drug, validate_trial, validate_sl)"]

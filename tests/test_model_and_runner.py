@@ -16,6 +16,8 @@ from biosciences_temporal.agents.models import GeneInfo
 from biosciences_temporal.agents.resolve import _runner as resolve_gene_runner
 from biosciences_temporal.agents.resolve import resolve_gene
 from biosciences_temporal.temporal.connection import SERVICE_NAME, setup_logfire
+from biosciences_temporal.temporal.worker import WORKFLOW_RUNNER
+from biosciences_temporal.temporal.workflows import CQ14Workflow
 
 
 def test_setup_logfire_and_plugin_preserve_host_configuration() -> None:
@@ -151,4 +153,17 @@ async def test_agent_runner_rejects_empty_toolset_override_with_production_model
         pytest.raises(ValueError, match="cannot run a non-test model with an empty"),
     ):
         await resolve_gene_runner.run("Resolve gene: TP53")
+
+
+async def test_cq14_workflow_passes_sandboxed_workflow_runner_validation() -> None:
+    """WORKFLOW_RUNNER (SandboxedWorkflowRunner + PydanticAIPlugin) validates CQ14Workflow cleanly."""
+    from pydantic_ai.durable_exec.temporal import _workflow_runner
+    from temporalio import workflow
+    from temporalio.worker.workflow_sandbox import SandboxedWorkflowRunner
+
+    runner = _workflow_runner(WORKFLOW_RUNNER)
+    assert isinstance(runner, SandboxedWorkflowRunner)
+    defn = workflow._Definition.must_from_class(CQ14Workflow)
+    runner.prepare_workflow(defn)
+
 
