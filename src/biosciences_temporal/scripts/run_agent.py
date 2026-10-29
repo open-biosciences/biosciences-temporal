@@ -9,22 +9,27 @@ Usage:
     uv run python -m src.biosciences_temporal.scripts.run_agent --gene-a BRCA1 --gene-b PARP1
 """
 
-# Configure Logfire before other imports that use Pydantic AI
-import logfire
-
-logfire.configure()
-logfire.instrument_pydantic_ai()
-
+# Load .env first so LOGFIRE_TOKEN, OPENROUTER_API_KEY, and model overrides are set
+# before Logfire and the agents see them.
+# override=True: .env wins over stale shell exports.
 import argparse
 import asyncio
 import json
 import os
 import sys
 
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # Add parent to path for relative imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from src.biosciences_temporal.agents.cq14 import CQ14Orchestrator
+from src.biosciences_temporal.temporal.connection import setup_logfire  # noqa: E402
+
+setup_logfire()
+
+from src.biosciences_temporal.agents.cq14 import CQ14Orchestrator  # noqa: E402
 
 
 def main():
@@ -36,8 +41,8 @@ def main():
     args = parser.parse_args()
 
     # Check environment
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY not set")
+    if not os.environ.get("OPENROUTER_API_KEY") and not os.environ.get("USE_TEST_MODEL"):
+        print("Error: OPENROUTER_API_KEY not set (or set USE_TEST_MODEL=true for offline test runs)")
         sys.exit(1)
 
     # Run workflow

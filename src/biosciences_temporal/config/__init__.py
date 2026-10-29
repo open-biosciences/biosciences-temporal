@@ -8,6 +8,7 @@ from .timeouts import (
     LONG_ACTIVITY_CONFIG,
     SHORT_ACTIVITY_CONFIG,
     TASK_QUEUE,
+    TEMPORAL_ADDRESS,
 )
 from .retry_policies import (
     LONG_ACTIVITY_RETRY,
@@ -20,6 +21,7 @@ __all__ = [
     "SHORT_ACTIVITY_CONFIG",
     "LONG_ACTIVITY_CONFIG",
     "TASK_QUEUE",
+    "TEMPORAL_ADDRESS",
     # Retry policies
     "SHORT_ACTIVITY_RETRY",
     "LONG_ACTIVITY_RETRY",

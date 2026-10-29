@@ -58,7 +58,7 @@ Each activity creates its own MCP client, uses it, and closes it within the same
 async def resolve_gene(gene_symbol: str) -> GeneInfo:
     mcp = create_mcp_client()
     async with mcp:
-        agent = Agent(MODEL, instructions=..., output_type=GeneInfo, toolsets=[mcp])
+        agent = Agent(create_model(), instructions=..., output_type=GeneInfo, toolsets=[mcp])
         result = await agent.run(f"Resolve gene: {gene_symbol}")
     return result.output
 
@@ -87,8 +87,9 @@ async def resolve_gene(gene_symbol: str) -> dict:
 docker-compose up -d
 
 # Environment variables
-export OPENAI_API_KEY="sk-..."
-export BIOGRID_API_KEY="..."  # Free: https://webservice.thebiogrid.org/
+export OPENROUTER_API_KEY="sk-or-v1-..."  # OpenRouter free tier (nvidia/nemotron-3.5-lightning:free)
+export LOGFIRE_TOKEN="..."                # Optional: Logfire OpenTelemetry tracing
+export BIOGRID_API_KEY="..."              # Free: https://webservice.thebiogrid.org/
 ```
 
 ### 2. Run Standalone (No Temporal)
@@ -141,7 +142,9 @@ Phase 5: Validate    - Cross-check all claims (parallel)
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `OPENAI_API_KEY` | Yes | Pydantic AI agent LLM calls |
+| `OPENROUTER_API_KEY` | Yes | Pydantic AI agent LLM calls (OpenRouter free tier: `nvidia/nemotron-3.5-lightning:free`) |
+| `LOGFIRE_TOKEN` | No | Logfire OpenTelemetry tracing across Temporal + PydanticAI |
+| `TYPESAFE_API_KEY` | No | Direct TypeSafe (`jev-latest`) decision triage |
 | `BIOGRID_API_KEY` | Yes | BioGRID interactions API |
 | `NCBI_API_KEY` | No | Higher NCBI/Entrez rate limits |
 

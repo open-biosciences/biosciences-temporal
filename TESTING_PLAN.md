@@ -29,9 +29,10 @@ Using `MCPServerStdio` instead of `MCPServerStreamableHTTP` should resolve the i
 
 2. **Environment variables set**:
    ```bash
-   export OPENAI_API_KEY=...    # Required for Pydantic AI agents
-   export BIOGRID_API_KEY=...   # Required for BioGRID interactions
-   export NCBI_API_KEY=...      # Optional, for higher rate limits
+   export OPENROUTER_API_KEY=... # Required for Pydantic AI agents (OpenRouter free tier)
+   export LOGFIRE_TOKEN=...      # Optional, for Logfire OpenTelemetry tracing
+   export BIOGRID_API_KEY=...    # Required for BioGRID interactions
+   export NCBI_API_KEY=...       # Optional, for higher rate limits
    ```
 
 ### Step 1: Start the Worker

@@ -6,11 +6,16 @@ These configs are passed to workflow.execute_activity() calls.
 """
 
 from datetime import timedelta
+import os
 
 from .retry_policies import (
     LONG_ACTIVITY_RETRY,
     SHORT_ACTIVITY_RETRY,
 )
+
+
+# Temporal server address
+TEMPORAL_ADDRESS = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
 
 
 # Short MCP activities (resolve_gene, enrich_protein, validators)
