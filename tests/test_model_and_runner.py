@@ -16,6 +16,8 @@ from biosciences_temporal.agents.models import GeneInfo
 from biosciences_temporal.agents.resolve import _runner as resolve_gene_runner
 from biosciences_temporal.agents.resolve import resolve_gene
 from biosciences_temporal.temporal.connection import SERVICE_NAME, setup_logfire
+from biosciences_temporal.temporal.worker import WORKFLOW_RUNNER
+from biosciences_temporal.temporal.workflows import CQ14Workflow
 
 
 def test_setup_logfire_and_plugin_preserve_host_configuration() -> None:
@@ -44,21 +46,30 @@ def test_create_model_offline_returns_test_model_without_tool_calls() -> None:
 def test_create_model_with_typesafe_and_openrouter_keys(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """With TYPESAFE_API_KEY and OPENROUTER_API_KEY set, create_model builds TypeSafeModel + OpenRouterModel."""
+    """By default, research agents use OpenRouterModel; use_decision_model=True prepends TypeSafeModel."""
     monkeypatch.setenv("TYPESAFE_API_KEY", "ts-test-key")
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
     monkeypatch.setenv("BIOSCIENCES_MODEL_ANCHOR_RESOLVE", "google/gemma-4-31b-it:free")
 
-    # TypeSafe + OpenRouter chain with per-agent override
-    model = create_model(agent_name="anchor_resolve")
-    assert isinstance(model, FallbackModel)
-    assert len(model.models) == 3
-    assert isinstance(model.models[0], TypeSafeModel)
-    assert model.models[0].model_name == "jev-latest"
-    assert isinstance(model.models[1], OpenRouterModel)
-    assert model.models[1].model_name == "google/gemma-4-31b-it:free"
-    assert isinstance(model.models[2], OpenRouterModel)
-    assert model.models[2].model_name == "openrouter/free"
+    # Default research agent model chain (OpenRouter only, since output schemas have free-form str fields)
+    research_model = create_model(agent_name="anchor_resolve")
+    assert isinstance(research_model, FallbackModel)
+    assert len(research_model.models) == 2
+    assert isinstance(research_model.models[0], OpenRouterModel)
+    assert research_model.models[0].model_name == "google/gemma-4-31b-it:free"
+    assert isinstance(research_model.models[1], OpenRouterModel)
+    assert research_model.models[1].model_name == "openrouter/free"
+
+    # Decision/gate model chain (TypeSafe + OpenRouter fallback)
+    decision_model = create_model(agent_name="anchor_resolve", use_decision_model=True)
+    assert isinstance(decision_model, FallbackModel)
+    assert len(decision_model.models) == 3
+    assert isinstance(decision_model.models[0], TypeSafeModel)
+    assert decision_model.models[0].model_name == "jev-latest"
+    assert isinstance(decision_model.models[1], OpenRouterModel)
+    assert decision_model.models[1].model_name == "google/gemma-4-31b-it:free"
+    assert isinstance(decision_model.models[2], OpenRouterModel)
+    assert decision_model.models[2].model_name == "openrouter/free"
 
 
 def test_create_model_typesafe_only(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -142,4 +153,17 @@ async def test_agent_runner_rejects_empty_toolset_override_with_production_model
         pytest.raises(ValueError, match="cannot run a non-test model with an empty"),
     ):
         await resolve_gene_runner.run("Resolve gene: TP53")
+
+
+async def test_cq14_workflow_passes_sandboxed_workflow_runner_validation() -> None:
+    """WORKFLOW_RUNNER (SandboxedWorkflowRunner + PydanticAIPlugin) validates CQ14Workflow cleanly."""
+    from pydantic_ai.durable_exec.temporal import _workflow_runner
+    from temporalio import workflow
+    from temporalio.worker.workflow_sandbox import SandboxedWorkflowRunner
+
+    runner = _workflow_runner(WORKFLOW_RUNNER)
+    assert isinstance(runner, SandboxedWorkflowRunner)
+    defn = workflow._Definition.must_from_class(CQ14Workflow)
+    runner.prepare_workflow(defn)
+
 

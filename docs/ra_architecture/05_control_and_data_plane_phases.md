@@ -23,8 +23,9 @@ The architectural invariants, ADR-001 retry policies, and verification checks of
 
 ---
 
-## 3. Grounding `UnsandboxedWorkflowRunner` vs. `SandboxedWorkflowRunner` ([`worker.py`](../../src/biosciences_temporal/temporal/worker.py))
+## 3. Deterministic workflow sandboxing (`SandboxedWorkflowRunner`) ([`worker.py`](../../src/biosciences_temporal/temporal/worker.py))
 
-[`worker.py`](../../src/biosciences_temporal/temporal/worker.py) `main` currently configures `workflow_runner=UnsandboxedWorkflowRunner()`:
-- **Why it was set**: Originally configured to avoid `pydantic_ai` → `anyio` → `sniffio._impl` (`_ThreadLocal()` subclassing `threading.local`) raising `RuntimeError: Restriction state not present. Using subclasses of proxied objects is unsupported` inside Temporal's workflow sandbox.
-- **Verified current state**: Because [`__init__.py`](../../src/biosciences_temporal/__init__.py) and [`temporal/__init__.py`](../../src/biosciences_temporal/temporal/__init__.py) were emptied (`__all__: list[str] = []`) and [`workflows.py`](../../src/biosciences_temporal/temporal/workflows.py) wraps `from ..config import ...` inside `with workflow.unsafe.imports_passed_through():`, `SandboxedWorkflowRunner().prepare_workflow(CQ14Workflow)` passes cleanly on the current module graph. Switching `worker.py` to `SandboxedWorkflowRunner(restrictions=SandboxRestrictions.default.with_passthrough_modules("biosciences_temporal.config"))` is ready whenever desired.
+[`worker.py`](../../src/biosciences_temporal/temporal/worker.py) defines `WORKFLOW_RUNNER = SandboxedWorkflowRunner(restrictions=SandboxRestrictions.default.with_passthrough_modules("biosciences_temporal.config", "beartype"))` and passes `workflow_runner=WORKFLOW_RUNNER` to `Worker(...)`:
+- **Package isolation**: [`__init__.py`](../../src/biosciences_temporal/__init__.py) and [`temporal/__init__.py`](../../src/biosciences_temporal/temporal/__init__.py) have empty `__all__: list[str] = []` so importing `biosciences_temporal.temporal.workflows` inside the sandbox never triggers eager agent/MCP imports.
+- **Explicit passthroughs**: [`workflows.py`](../../src/biosciences_temporal/temporal/workflows.py) wraps `from ..config import LONG_ACTIVITY_CONFIG, SHORT_ACTIVITY_CONFIG` in `with workflow.unsafe.imports_passed_through():`, and `PydanticAIPlugin` (`connection.py`) automatically adds passthroughs for `pydantic_ai`, `pydantic`, `logfire`, `httpx`, `anyio`, `sniffio`, `fastmcp`, `mcp`, and `beartype`.
+- **Verification**: [`tests/test_model_and_runner.py`](../../tests/test_model_and_runner.py) verifies `WORKFLOW_RUNNER.prepare_workflow` on `CQ14Workflow` in the unit test suite.

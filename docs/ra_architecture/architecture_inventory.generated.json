@@ -91,7 +91,7 @@
       "validate_trial",
       "validate_synthetic_lethality"
     ],
-    "workflow_runner": "UnsandboxedWorkflowRunner()",
+    "workflow_runner": "WORKFLOW_RUNNER",
     "plugins": [
       "PydanticAIPlugin()",
       "LogfirePlugin(setup_logfire=setup_logfire, metrics=False)"

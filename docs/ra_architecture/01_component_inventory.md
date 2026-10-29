@@ -8,7 +8,7 @@ Names, registration, activity signatures, and `AgentRunner` metadata come from [
 
 ## 1. Temporal workflows ([`workflows.py`](../../src/biosciences_temporal/temporal/workflows.py))
 
-Registered in [`worker.py`](../../src/biosciences_temporal/temporal/worker.py) `main` on `TASK_QUEUE` (`biosciences-task-queue`), with `UnsandboxedWorkflowRunner()`, and connected via [`connection.py`](../../src/biosciences_temporal/temporal/connection.py) `connect` (`plugins=[PydanticAIPlugin(), LogfirePlugin(metrics=False)]`).
+Registered in [`worker.py`](../../src/biosciences_temporal/temporal/worker.py) `main` on `TASK_QUEUE` (`biosciences-task-queue`), with `WORKFLOW_RUNNER` (`SandboxedWorkflowRunner`), and connected via [`connection.py`](../../src/biosciences_temporal/temporal/connection.py) `connect` (`plugins=[PydanticAIPlugin(), LogfirePlugin(setup_logfire=setup_logfire, metrics=False)]`).
 
 | Workflow | Input | Activities, in order | Output | Activity configs ([`timeouts.py`](../../src/biosciences_temporal/config/timeouts.py)) |
 | :--- | :--- | :--- | :--- | :--- |
