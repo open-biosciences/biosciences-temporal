@@ -21,19 +21,16 @@ import os
 import sys
 
 from dotenv import load_dotenv
-import logfire
 
 # override=True: .env wins over stale shell exports.
 load_dotenv(override=True)
 
-if os.getenv("LOGFIRE_TOKEN"):
-    logfire.configure(token=os.getenv("LOGFIRE_TOKEN"), service_name="biosciences-temporal")
-else:
-    logfire.configure(send_to_logfire=False, service_name="biosciences-temporal")
-logfire.instrument_pydantic_ai()
-
 # Add parent to path for relative imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+
+from src.biosciences_temporal.temporal.connection import setup_logfire  # noqa: E402
+
+setup_logfire()
 
 from src.biosciences_temporal.temporal.client import start_workflow, get_result  # noqa: E402
 
@@ -63,11 +60,11 @@ async def main():
         )
 
         if args.no_wait:
-            print(f"Workflow started. Check status at:")
+            print("Workflow started. Check status at:")
             print(f"  http://localhost:8233/namespaces/default/workflows/{workflow_id}")
             return
 
-        print(f"Waiting for workflow to complete...")
+        print("Waiting for workflow to complete...")
         result = await get_result(workflow_id)
 
     print("\n" + "=" * 60)

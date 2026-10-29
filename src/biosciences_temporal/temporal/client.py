@@ -4,7 +4,6 @@ Temporal client for triggering CQ14 workflows.
 Provides functions to start new workflows or get results from existing ones.
 """
 
-import asyncio
 import json
 import uuid
 from dataclasses import asdict
@@ -46,7 +45,7 @@ async def start_workflow(
         condition=condition,
     )
 
-    handle = await client.start_workflow(
+    await client.start_workflow(
         CQ14Workflow.run,
         json.dumps(asdict(input_data)),
         id=workflow_id,

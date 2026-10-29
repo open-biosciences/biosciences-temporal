@@ -170,7 +170,7 @@ def manifest(root: Path) -> dict:
             },
             "mcp_stdio": {
                 "id": "biosciences_mcp",
-                "transport": "MCPServerStdio",
+                "transport": "MCPToolset (StdioTransport)",
                 "command": "uv",
                 "args": ["run", "fastmcp", "run", GATEWAY_SERVER],
                 "sibling_repo": "biosciences-mcp",

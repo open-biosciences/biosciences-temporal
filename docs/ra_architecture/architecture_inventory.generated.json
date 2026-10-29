@@ -94,7 +94,7 @@
     "workflow_runner": "UnsandboxedWorkflowRunner()",
     "plugins": [
       "PydanticAIPlugin()",
-      "LogfirePlugin(metrics=False)"
+      "LogfirePlugin(setup_logfire=setup_logfire, metrics=False)"
     ]
   },
   "activities": [

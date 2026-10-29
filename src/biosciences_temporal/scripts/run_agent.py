@@ -19,19 +19,15 @@ import os
 import sys
 
 from dotenv import load_dotenv
-import logfire
 
 load_dotenv(override=True)
 
-# Configure Logfire before other imports that use Pydantic AI
-if os.getenv("LOGFIRE_TOKEN"):
-    logfire.configure(token=os.getenv("LOGFIRE_TOKEN"), service_name="biosciences-temporal")
-else:
-    logfire.configure(send_to_logfire=False, service_name="biosciences-temporal")
-logfire.instrument_pydantic_ai()
-
 # Add parent to path for relative imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+
+from src.biosciences_temporal.temporal.connection import setup_logfire  # noqa: E402
+
+setup_logfire()
 
 from src.biosciences_temporal.agents.cq14 import CQ14Orchestrator  # noqa: E402
 

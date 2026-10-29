@@ -5,14 +5,18 @@ Provides the MCP client factory, shared configuration, and AgentRunner helper.
 """
 
 import os
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
+from fastmcp.client.transports import StdioTransport
 from pydantic_ai import Agent
-from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.models import Model
 from pydantic_ai.models.test import TestModel
+from pydantic_ai.toolsets import AbstractToolset
 from pydantic_ai.usage import UsageLimits
 
 
@@ -79,39 +83,44 @@ MODEL = OPENROUTER_FREE_MODEL
 USAGE_LIMITS = UsageLimits(request_limit=100)
 
 
-def create_mcp_client() -> MCPServerStdio:
-    """Create MCP client using stdio transport.
+def create_mcp_client() -> MCPToolset:
+    """Create MCP toolset using stdio transport.
 
     Uses stdio transport to avoid async cancel scope issues with Temporal.
     The server runs as a subprocess in the biosciences-mcp project.
     Environment variables are passed explicitly to ensure API keys are available.
 
     Returns:
-        MCPServerStdio configured to run the biosciences gateway server.
+        MCPToolset configured to run the biosciences gateway server.
     """
     # Pass parent environment to subprocess (includes API keys)
     env = os.environ.copy()
 
-    return MCPServerStdio(
+    transport = StdioTransport(
         command='uv',
         args=['run', 'fastmcp', 'run', GATEWAY_SERVER],
         cwd=BIOSCIENCES_MCP_PATH,
         env=env,
+    )
+    return MCPToolset(
+        transport,
         id='biosciences_mcp',
-        timeout=120.0,
+        init_timeout=120.0,
+        read_timeout=120.0,
     )
 
 
 def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> Model:
-    """Create the PydanticAI model with OpenRouter free-tier and offline fallback.
+    """Create the PydanticAI model with TypeSafe Jev, OpenRouter free-tier, and offline fallback.
 
     Resolution order:
-    1. TestModel() if USE_TEST_MODEL is true.
-    2. Optional TypeSafe (Jev) decision model if TYPESAFE_API_KEY and typesafe-sdk are available.
-    3. Per-agent override BIOSCIENCES_MODEL_<AGENT_NAME_UPPER> (if agent_name is given),
-       otherwise model_name (OPENROUTER_FREE_MODEL), with fallback to OPENROUTER_FALLBACK_MODEL
-       if OPENROUTER_API_KEY is set.
-    4. TestModel() fallback when no API keys are present (offline development / tests).
+    1. ``TestModel(call_tools=[])`` if ``USE_TEST_MODEL`` is truthy.
+    2. ``TypeSafeModel(TYPESAFE_MODEL_NAME)`` if ``TYPESAFE_API_KEY`` is set.
+    3. Per-agent override ``BIOSCIENCES_MODEL_<AGENT_NAME_UPPER>`` (if ``agent_name`` is given),
+       otherwise ``model_name`` (``OPENROUTER_FREE_MODEL``), with fallback to
+       ``OPENROUTER_FALLBACK_MODEL`` if ``OPENROUTER_API_KEY`` is set.
+    4. ``TestModel(call_tools=[])`` fallback only when neither ``TYPESAFE_API_KEY`` nor
+       ``OPENROUTER_API_KEY`` is present (offline development / tests).
 
     Args:
         model_name: Primary OpenRouter model identifier (default: MODEL constant).
@@ -121,7 +130,7 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
         Configured Model (or FallbackModel / TestModel).
     """
     if os.getenv("USE_TEST_MODEL", "").lower() in ("1", "true", "yes"):
-        return TestModel()
+        return TestModel(call_tools=[])
 
     effective_model = model_name
     if agent_name:
@@ -132,12 +141,9 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
     models: list[Model] = []
 
     if os.getenv("TYPESAFE_API_KEY"):
-        try:
-            from pydantic_ai.models.typesafe import TypeSafeModel  # type: ignore[import-not-found]
+        from pydantic_ai.models.typesafe import TypeSafeModel
 
-            models.append(TypeSafeModel(TYPESAFE_MODEL_NAME))
-        except Exception:
-            pass
+        models.append(TypeSafeModel(TYPESAFE_MODEL_NAME))
 
     if os.getenv("OPENROUTER_API_KEY"):
         from pydantic_ai.models.openrouter import OpenRouterModel
@@ -147,7 +153,7 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
             models.append(OpenRouterModel(OPENROUTER_FALLBACK_MODEL))
 
     if not models:
-        return TestModel()
+        return TestModel(call_tools=[])
 
     if len(models) == 1:
         return models[0]
@@ -225,6 +231,7 @@ class AgentRunner(Generic[T]):
         metadata: AgentMetadata,
         model: Model | str | None = None,
         usage_limits: UsageLimits = USAGE_LIMITS,
+        toolsets: Sequence[AbstractToolset[Any]] | None = None,
     ):
         """Initialize the agent runner.
 
@@ -235,6 +242,9 @@ class AgentRunner(Generic[T]):
             metadata: Structured metadata for tracing.
             model: Model instance or identifier (default: gateway model from create_model()).
             usage_limits: Request limits (default: USAGE_LIMITS constant).
+            toolsets: Optional toolsets override (e.g., ``FunctionToolset`` in unit tests).
+                When omitted, live runs spawn ``create_mcp_client()`` while ``TestModel``
+                runs use ``toolsets=[]`` so offline tests never invoke external MCP tools.
         """
         self.output_type = output_type
         self.instructions = instructions
@@ -242,12 +252,38 @@ class AgentRunner(Generic[T]):
         self.metadata = metadata
         self.model = model
         self.usage_limits = usage_limits
+        self.toolsets = toolsets
+
+    @contextmanager
+    def override(
+        self,
+        *,
+        model: Model | str | None = None,
+        toolsets: Sequence[AbstractToolset[Any]] | None = None,
+    ) -> Iterator[None]:
+        """Temporarily override the runner's model and/or toolsets for testing.
+
+        Mirrors ``pydantic_ai.Agent.override()`` so tests can inject ``TestModel``,
+        ``FunctionModel``, or ``FunctionToolset`` without monkeypatching module globals.
+        """
+        prev_model = self.model
+        prev_toolsets = self.toolsets
+        if model is not None:
+            self.model = model
+        if toolsets is not None:
+            self.toolsets = toolsets
+        try:
+            yield
+        finally:
+            self.model = prev_model
+            self.toolsets = prev_toolsets
 
     async def run(self, prompt: str, cq_id: str | None = None) -> T:
         """Execute the agent with MCP lifecycle contained.
 
-        The MCP client is created, used, and closed within this single call,
-        ensuring the anyio cancel scope is properly managed within one task.
+        When an explicit ``toolsets`` override is configured or when the resolved model is
+        ``TestModel``, ``create_mcp_client()`` is skipped so offline tests never spawn the
+        live ``biosciences-mcp`` subprocess or call external biological APIs.
 
         Args:
             prompt: The prompt to send to the agent.
@@ -256,11 +292,28 @@ class AgentRunner(Generic[T]):
         Returns:
             The structured output from the agent.
         """
+        resolved_model = (
+            self.model if self.model is not None else create_model(agent_name=self.name)
+        )
+
+        if self.toolsets is not None or isinstance(resolved_model, TestModel):
+            active_toolsets = list(self.toolsets) if self.toolsets is not None else []
+            agent = Agent(
+                resolved_model,
+                output_type=self.output_type,
+                instructions=self.instructions,
+                name=self.name,
+                toolsets=active_toolsets,
+                metadata=self.metadata.to_dict(cq_id),
+            )
+            result = await agent.run(prompt, usage_limits=self.usage_limits)
+            return result.output
+
         mcp = create_mcp_client()
 
         async with mcp:
             agent = Agent(
-                self.model if self.model is not None else create_model(agent_name=self.name),
+                resolved_model,
                 output_type=self.output_type,
                 instructions=self.instructions,
                 name=self.name,

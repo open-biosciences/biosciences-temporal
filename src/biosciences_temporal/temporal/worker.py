@@ -25,7 +25,7 @@ async def main():
     client = await connect(TEMPORAL_ADDRESS)
 
     print(f"Starting worker on task queue: {TASK_QUEUE}")
-    print(f"Registered workflow: CQ14Workflow")
+    print("Registered workflow: CQ14Workflow")
     print(f"Registered activities: {len(ALL_ACTIVITIES)}")
 
     # Use UnsandboxedWorkflowRunner because pydantic_ai imports anyio/sniffio

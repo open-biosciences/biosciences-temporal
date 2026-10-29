@@ -28,7 +28,7 @@ from .enrich import enrich_protein
 from .expand import expand_interactions
 from .drugs import find_drugs
 from .trials import search_trials
-from .validate import validate_gene, validate_drug, validate_synthetic_lethality
+from .validate import validate_drug, validate_synthetic_lethality
 
 
 @dataclass
