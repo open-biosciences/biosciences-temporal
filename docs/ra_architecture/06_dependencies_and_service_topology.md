@@ -22,6 +22,7 @@ The full list is extracted into [`docs/inspect.json`](../inspect.json) under `de
 | Package | Version Constraint | Role |
 | :--- | :--- | :--- |
 | `pydantic-ai[temporal]` | `>=2.62.0` | `Agent`, `MCPToolset`, `OpenRouterModel`, `TypeSafeModel`, `FallbackModel`, `TestModel`, `FunctionToolset`, `PydanticAIPlugin`, `LogfirePlugin`, `UsageLimits` |
+| `fastmcp` | `>=3.0,<4.0` | `StdioTransport` client speaking MCP SDK v1 wire protocol compatible with `biosciences-mcp` (`fastmcp 2.14.x`) |
 | `typesafe-sdk` | `>=0.7.5` | TypeSafe (`jev-latest`) client SDK backing `pydantic_ai.models.typesafe.TypeSafeModel` |
 | `temporalio` | `>=1.34.0` | Workflow, activity, worker (`UnsandboxedWorkflowRunner`), and client runtime |
 | `pydantic` | `>=2.14.0` | Structured output models (`agents/models.py`) |

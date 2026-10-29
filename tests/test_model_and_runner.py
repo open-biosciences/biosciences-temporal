@@ -44,21 +44,30 @@ def test_create_model_offline_returns_test_model_without_tool_calls() -> None:
 def test_create_model_with_typesafe_and_openrouter_keys(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """With TYPESAFE_API_KEY and OPENROUTER_API_KEY set, create_model builds TypeSafeModel + OpenRouterModel."""
+    """By default, research agents use OpenRouterModel; use_decision_model=True prepends TypeSafeModel."""
     monkeypatch.setenv("TYPESAFE_API_KEY", "ts-test-key")
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
     monkeypatch.setenv("BIOSCIENCES_MODEL_ANCHOR_RESOLVE", "google/gemma-4-31b-it:free")
 
-    # TypeSafe + OpenRouter chain with per-agent override
-    model = create_model(agent_name="anchor_resolve")
-    assert isinstance(model, FallbackModel)
-    assert len(model.models) == 3
-    assert isinstance(model.models[0], TypeSafeModel)
-    assert model.models[0].model_name == "jev-latest"
-    assert isinstance(model.models[1], OpenRouterModel)
-    assert model.models[1].model_name == "google/gemma-4-31b-it:free"
-    assert isinstance(model.models[2], OpenRouterModel)
-    assert model.models[2].model_name == "openrouter/free"
+    # Default research agent model chain (OpenRouter only, since output schemas have free-form str fields)
+    research_model = create_model(agent_name="anchor_resolve")
+    assert isinstance(research_model, FallbackModel)
+    assert len(research_model.models) == 2
+    assert isinstance(research_model.models[0], OpenRouterModel)
+    assert research_model.models[0].model_name == "google/gemma-4-31b-it:free"
+    assert isinstance(research_model.models[1], OpenRouterModel)
+    assert research_model.models[1].model_name == "openrouter/free"
+
+    # Decision/gate model chain (TypeSafe + OpenRouter fallback)
+    decision_model = create_model(agent_name="anchor_resolve", use_decision_model=True)
+    assert isinstance(decision_model, FallbackModel)
+    assert len(decision_model.models) == 3
+    assert isinstance(decision_model.models[0], TypeSafeModel)
+    assert decision_model.models[0].model_name == "jev-latest"
+    assert isinstance(decision_model.models[1], OpenRouterModel)
+    assert decision_model.models[1].model_name == "google/gemma-4-31b-it:free"
+    assert isinstance(decision_model.models[2], OpenRouterModel)
+    assert decision_model.models[2].model_name == "openrouter/free"
 
 
 def test_create_model_typesafe_only(monkeypatch: pytest.MonkeyPatch) -> None:

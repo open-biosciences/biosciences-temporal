@@ -95,8 +95,10 @@ def create_mcp_client() -> MCPToolset:
     Returns:
         MCPToolset configured to run the biosciences gateway server.
     """
-    # Pass parent environment to subprocess (includes API keys)
+    # Pass parent environment to subprocess (includes API keys), stripping VIRTUAL_ENV
+    # so `uv run` in BIOSCIENCES_MCP_PATH uses its own .venv without warnings.
     env = os.environ.copy()
+    env.pop("VIRTUAL_ENV", None)
 
     transport = StdioTransport(
         command='uv',
@@ -112,12 +114,19 @@ def create_mcp_client() -> MCPToolset:
     )
 
 
-def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> Model:
-    """Create the PydanticAI model with TypeSafe Jev, OpenRouter free-tier, and offline fallback.
+def create_model(
+    model_name: str = MODEL,
+    *,
+    agent_name: str | None = None,
+    use_decision_model: bool = False,
+) -> Model:
+    """Create the PydanticAI model with OpenRouter free-tier, optional TypeSafe Jev, and offline fallback.
 
     Resolution order:
     1. ``TestModel(call_tools=[])`` if ``USE_TEST_MODEL`` is truthy.
-    2. ``TypeSafeModel(TYPESAFE_MODEL_NAME)`` if ``TYPESAFE_API_KEY`` is set.
+    2. ``TypeSafeModel(TYPESAFE_MODEL_NAME)`` if ``TYPESAFE_API_KEY`` is set and either
+       ``use_decision_model=True`` (for constrained ``bool``/``Literal``/bounded-``float``
+       decision schemas) or ``OPENROUTER_API_KEY`` is not set.
     3. Per-agent override ``BIOSCIENCES_MODEL_<AGENT_NAME_UPPER>`` (if ``agent_name`` is given),
        otherwise ``model_name`` (``OPENROUTER_FREE_MODEL``), with fallback to
        ``OPENROUTER_FALLBACK_MODEL`` if ``OPENROUTER_API_KEY`` is set.
@@ -127,6 +136,9 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
     Args:
         model_name: Primary OpenRouter model identifier (default: MODEL constant).
         agent_name: Optional AgentRunner.name to look up BIOSCIENCES_MODEL_<AGENT_NAME_UPPER>.
+        use_decision_model: Whether the caller's output schema is a constrained decision schema
+            compatible with ``TypeSafeModel`` (``DecisionModel``). Defaults to ``False`` because
+            the 9 CQ14 research agents emit free-form CURIE and text strings.
 
     Returns:
         Configured Model (or FallbackModel / TestModel).
@@ -141,13 +153,14 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
             effective_model = env_override
 
     models: list[Model] = []
+    has_openrouter = bool(os.getenv("OPENROUTER_API_KEY"))
 
-    if os.getenv("TYPESAFE_API_KEY"):
+    if os.getenv("TYPESAFE_API_KEY") and (use_decision_model or not has_openrouter):
         from pydantic_ai.models.typesafe import TypeSafeModel
 
         models.append(TypeSafeModel(TYPESAFE_MODEL_NAME))
 
-    if os.getenv("OPENROUTER_API_KEY"):
+    if has_openrouter:
         from pydantic_ai.models.openrouter import OpenRouterModel
 
         models.append(OpenRouterModel(effective_model))
@@ -160,9 +173,10 @@ def create_model(model_name: str = MODEL, *, agent_name: str | None = None) -> M
     if len(models) == 1:
         return models[0]
 
+    from pydantic_ai.exceptions import ModelAPIError, UserError
     from pydantic_ai.models.fallback import FallbackModel
 
-    return FallbackModel(*models)
+    return FallbackModel(*models, fallback_on=(ModelAPIError, UserError))
 
 
 # --- Agent Metadata ---
