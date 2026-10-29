@@ -18,3 +18,4 @@ def isolate_model_and_telemetry_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "BIOSCIENCES_MODEL_ANCHOR_RESOLVE",
     ):
         monkeypatch.delenv(var, raising=False)
+

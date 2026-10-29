@@ -1,5 +1,7 @@
 """Tests for Logfire configuration preservation, model resolution, and offline AgentRunner testing."""
 
+import asyncio
+
 import logfire
 import pytest
 from pydantic_ai.durable_exec.temporal import LogfirePlugin
@@ -89,7 +91,55 @@ async def test_agent_runner_override_with_function_toolset() -> None:
         model=TestModel(call_tools=["lookup_hgnc_gene"]),
         toolsets=[toolset],
     ):
+        assert resolve_gene_runner.model is None
         result = await resolve_gene_runner.run("Resolve gene: TP53")
 
     assert isinstance(result, GeneInfo)
     assert len(called_with) == 1
+
+
+async def test_agent_runner_override_is_context_local_across_concurrent_tasks() -> None:
+    """Concurrent tasks on the same AgentRunner singleton keep isolated ContextVar overrides."""
+    task_a_calls: list[str] = []
+    toolset_a = FunctionToolset()
+
+    @toolset_a.tool_plain
+    def tool_only_for_task_a(symbol: str) -> dict[str, str]:
+        task_a_calls.append(symbol)
+        return {"hgnc_id": "HGNC:11998", "symbol": symbol}
+
+    async def run_with_tool_override() -> GeneInfo:
+        with resolve_gene_runner.override(
+            model=TestModel(call_tools=["tool_only_for_task_a"]),
+            toolsets=[toolset_a],
+        ):
+            await asyncio.sleep(0.01)
+            return await resolve_gene("TP53")
+
+    async def run_without_tool_override() -> GeneInfo:
+        await asyncio.sleep(0.005)
+        return await resolve_gene("TYMS")
+
+    res_a, res_b = await asyncio.gather(
+        run_with_tool_override(),
+        run_without_tool_override(),
+    )
+
+    assert isinstance(res_a, GeneInfo)
+    assert isinstance(res_b, GeneInfo)
+    assert len(task_a_calls) == 1
+
+
+async def test_agent_runner_rejects_empty_toolset_override_with_production_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An empty toolsets=[] override is rejected when a production model is configured."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
+    prod_model = OpenRouterModel("nvidia/nemotron-3.5-lightning:free")
+
+    with (
+        resolve_gene_runner.override(model=prod_model, toolsets=[]),
+        pytest.raises(ValueError, match="cannot run a non-test model with an empty"),
+    ):
+        await resolve_gene_runner.run("Resolve gene: TP53")
+

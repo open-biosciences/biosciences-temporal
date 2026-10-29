@@ -7,6 +7,7 @@ Provides the MCP client factory, shared configuration, and AgentRunner helper.
 import os
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Generic, TypeVar
@@ -15,6 +16,7 @@ from fastmcp.client.transports import StdioTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.models import Model
+from pydantic_ai.models.function import FunctionModel
 from pydantic_ai.models.test import TestModel
 from pydantic_ai.toolsets import AbstractToolset
 from pydantic_ai.usage import UsageLimits
@@ -231,7 +233,6 @@ class AgentRunner(Generic[T]):
         metadata: AgentMetadata,
         model: Model | str | None = None,
         usage_limits: UsageLimits = USAGE_LIMITS,
-        toolsets: Sequence[AbstractToolset[Any]] | None = None,
     ):
         """Initialize the agent runner.
 
@@ -242,9 +243,6 @@ class AgentRunner(Generic[T]):
             metadata: Structured metadata for tracing.
             model: Model instance or identifier (default: gateway model from create_model()).
             usage_limits: Request limits (default: USAGE_LIMITS constant).
-            toolsets: Optional toolsets override (e.g., ``FunctionToolset`` in unit tests).
-                When omitted, live runs spawn ``create_mcp_client()`` while ``TestModel``
-                runs use ``toolsets=[]`` so offline tests never invoke external MCP tools.
         """
         self.output_type = output_type
         self.instructions = instructions
@@ -252,7 +250,12 @@ class AgentRunner(Generic[T]):
         self.metadata = metadata
         self.model = model
         self.usage_limits = usage_limits
-        self.toolsets = toolsets
+        self._override_model: ContextVar[Model | str | None] = ContextVar(
+            f"{name}_override_model", default=None
+        )
+        self._override_toolsets: ContextVar[Sequence[AbstractToolset[Any]] | None] = (
+            ContextVar(f"{name}_override_toolsets", default=None)
+        )
 
     @contextmanager
     def override(
@@ -261,29 +264,34 @@ class AgentRunner(Generic[T]):
         model: Model | str | None = None,
         toolsets: Sequence[AbstractToolset[Any]] | None = None,
     ) -> Iterator[None]:
-        """Temporarily override the runner's model and/or toolsets for testing.
+        """Temporarily override the runner's model and/or toolsets in the current context.
 
-        Mirrors ``pydantic_ai.Agent.override()`` so tests can inject ``TestModel``,
-        ``FunctionModel``, or ``FunctionToolset`` without monkeypatching module globals.
+        Uses ``ContextVar`` (mirroring ``pydantic_ai.Agent.override()``) so concurrent
+        runs of module-level ``AgentRunner`` singletons never share or leak overridden
+        state across tasks.
         """
-        prev_model = self.model
-        prev_toolsets = self.toolsets
-        if model is not None:
-            self.model = model
-        if toolsets is not None:
-            self.toolsets = toolsets
+        model_token = (
+            self._override_model.set(model) if model is not None else None
+        )
+        toolsets_token = (
+            self._override_toolsets.set(toolsets) if toolsets is not None else None
+        )
         try:
             yield
         finally:
-            self.model = prev_model
-            self.toolsets = prev_toolsets
+            if model_token is not None:
+                self._override_model.reset(model_token)
+            if toolsets_token is not None:
+                self._override_toolsets.reset(toolsets_token)
 
     async def run(self, prompt: str, cq_id: str | None = None) -> T:
         """Execute the agent with MCP lifecycle contained.
 
-        When an explicit ``toolsets`` override is configured or when the resolved model is
-        ``TestModel``, ``create_mcp_client()`` is skipped so offline tests never spawn the
-        live ``biosciences-mcp`` subprocess or call external biological APIs.
+        When the resolved model is a test double (``TestModel`` or ``FunctionModel``) or when
+        replacement toolsets are injected via ``override()``, ``create_mcp_client()`` is skipped
+        so offline tests never spawn the live ``biosciences-mcp`` subprocess or call external
+        biological APIs. An empty ``toolsets=[]`` override with a non-test model is rejected
+        so production models never silently run without their required biological tools.
 
         Args:
             prompt: The prompt to send to the agent.
@@ -292,18 +300,40 @@ class AgentRunner(Generic[T]):
         Returns:
             The structured output from the agent.
         """
+        override_model = self._override_model.get()
+        override_toolsets = self._override_toolsets.get()
         resolved_model = (
-            self.model if self.model is not None else create_model(agent_name=self.name)
+            override_model
+            if override_model is not None
+            else (self.model if self.model is not None else create_model(agent_name=self.name))
         )
 
-        if self.toolsets is not None or isinstance(resolved_model, TestModel):
-            active_toolsets = list(self.toolsets) if self.toolsets is not None else []
+        is_test_model = isinstance(resolved_model, TestModel | FunctionModel)
+
+        if override_toolsets is not None:
+            if len(override_toolsets) == 0 and not is_test_model:
+                raise ValueError(
+                    f"AgentRunner '{self.name}' cannot run a non-test model with an empty "
+                    "toolsets=[] override; provide replacement toolsets or use TestModel/FunctionModel."
+                )
             agent = Agent(
                 resolved_model,
                 output_type=self.output_type,
                 instructions=self.instructions,
                 name=self.name,
-                toolsets=active_toolsets,
+                toolsets=list(override_toolsets),
+                metadata=self.metadata.to_dict(cq_id),
+            )
+            result = await agent.run(prompt, usage_limits=self.usage_limits)
+            return result.output
+
+        if is_test_model:
+            agent = Agent(
+                resolved_model,
+                output_type=self.output_type,
+                instructions=self.instructions,
+                name=self.name,
+                toolsets=[],
                 metadata=self.metadata.to_dict(cq_id),
             )
             result = await agent.run(prompt, usage_limits=self.usage_limits)
